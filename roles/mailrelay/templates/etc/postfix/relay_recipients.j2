@@ -1,0 +1,11 @@
+# /etc/postfix/relay_recipients
+# run  "postmap  /etc/postfix/relay_recipients"  after each edit
+# info@example.com    OK
+
+{% for recipient in recipient_list %}
+{{ recipient }}    OK
+{% endfor %}
+
+{% for transport in transport_list %}
+{% include "files/recipients/" + transport.domain ignore missing %}
+{% endfor %}

@@ -1,0 +1,68 @@
+---
+- name: ensure postfix packages are installed
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+    update_cache: yes
+    cache_valid_time: 600
+  register: postfixinstall
+  with_items:
+    - postfix
+    - postfix-pcre
+    - postfix-policyd-spf-python
+
+- name: configure mailname
+  template:
+    src: etc/mailname.j2
+    dest: /etc/mailname
+    owner: root
+    group: root
+    mode: 0644
+
+- name: configure postfix
+  template:
+    src: etc/postfix/{{ item }}.j2
+    dest: /etc/postfix/{{ item }}
+    owner: root
+    group: root
+    mode: 0644
+  register: postfixconf
+  with_items:
+    - client_access.cidr
+    - main.cf
+    - master.cf
+    - mime_header_checks
+    - postscreen_dnsbl_reply_map
+    - rbl_reply_maps
+    - relay_recipients
+    - transport
+    - virtual_aliases
+
+- name: run postmap on hash files
+  command: postmap /etc/postfix/{{ item }}
+  with_items:
+    - rbl_reply_maps
+    - relay_recipients
+    - transport
+    - virtual_aliases
+  when: postfixconf.changed
+  notify:
+    - restart postfix
+
+- name: generate dh* param keys.
+  shell: openssl dhparam -out dh{{ item }}.tmp {{ item }} && mv dh{{ item }}.tmp /etc/postfix/dh{{ item }}.pem
+  with_items:
+    - 512
+    - 1024
+    - 2048
+  when: postfixinstall.changed
+  notify:
+    - restart postfix
+
+- name: ensure all postfix services are started and enabled
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items:
+    - postfix

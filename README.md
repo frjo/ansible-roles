@@ -8,3 +8,7 @@ Here are some Ansible roles I have built for my own use.
 ## Letsencrypt
 
 Create a Letsencrypt cert with the help of the [acme-tiny](https://github.com/diafygi/acme-tiny) script. Includes a cron script for automatic renewal. Read more on my blog post [Let's Encrypt my servers with acme tiny](https://xdeb.org/node/1614).
+
+## Mail relay och MX backup
+
+Creates servers for [Mail relay och MX backup](https://xdeb.net/mailrelay) service using Debian 8 and Postfix. 

@@ -1,0 +1,11 @@
+{{ zen_rbl }}=127.0.0.10 521 4.7.1 Service unavailable;
+  $rbl_class [$rbl_what] blocked using
+  zen.spamhaus.org${rbl_reason?; $rbl_reason}
+
+{{ zen_rbl }}=127.0.0.11 521 4.7.1 Service unavailable;
+  $rbl_class [$rbl_what] blocked using
+  zen.spamhaus.org${rbl_reason?; $rbl_reason}
+
+{{ zen_rbl }} 554 5.7.1 Service unavailable;
+  $rbl_class [$rbl_what] blocked using
+  zen.spamhaus.org${rbl_reason?; $rbl_reason}

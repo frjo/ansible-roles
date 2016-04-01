@@ -1,0 +1,6 @@
+# /etc/postfix/virtual_aliases
+# run  "postmap  /etc/postfix/virtual_aliases"  after each edit
+# root    root@example.se
+
+postmaster      root@{{ ansible_domain }}
+root            root@{{ ansible_domain }}

@@ -1,0 +1,11 @@
+---
+acme_domains:
+  - "{{ ansible_fqdn }}"
+openports_list:
+  - 22
+  - 25
+transport_list:
+  - { domain: 'example.com', server: 'mail.example.com', port: 25 }
+recipient_list:
+  - "@example.com"
+zen_rbl: zen.spamhaus.org
