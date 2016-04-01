@@ -1,0 +1,7 @@
+---
+- include: acme-setup.yml
+  tags:
+    - setup
+- include: acme-tiny.yml
+  tags:
+    - getcert

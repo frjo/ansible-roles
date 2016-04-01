@@ -1,0 +1,108 @@
+---
+- name: ensure needed packages are installed
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+    update_cache: yes
+    cache_valid_time: 600
+  with_items:
+    - sudo
+    - lsof
+
+- name: set up acme group
+  group:
+    name: acme
+    gid: 3000
+    state: present
+
+- name: set up acme user with home dir
+  user:
+    name: acme
+    uid: 3000
+    group: acme
+    groups: www-data
+    shell: /bin/false
+    home: "{{ acme_certs_dir }}"
+    createhome: no
+    state: present
+
+- name: create folders for acme certs
+  file:
+    path: "{{ acme_certs_dir }}/{{acme_domains[0] }}"
+    state: directory
+    owner: root
+    group: acme
+    mode: 0770
+
+- name: copy the account key
+  copy:
+    src: files/letsencrypt/account_aes256.key
+    dest: "{{ acme_certs_dir }}/account_aes256.key"
+    owner: root
+    group: root
+    mode: 0440
+  register: acmeaccountkey
+  when: acme_account_key_passwd != ""
+
+- name: strip account key
+  command: openssl rsa -in {{ acme_certs_dir }}/account_aes256.key -out {{ acme_certs_dir }}/account.key -passin pass:{{ acme_account_key_passwd }}
+  when: acme_account_key_passwd != "" and acmeaccountkey.changed
+
+- name: set permissions on account key
+  file:
+    path: "{{ acme_certs_dir }}/account.key"
+    owner: root
+    group: acme
+    mode: 0440
+
+- name: generate a domain.key
+  shell: openssl genpkey -algorithm rsa -pkeyopt rsa_keygen_bits:2048 -out domain.key
+  args:
+    chdir: "{{ acme_certs_dir }}"
+    creates: "{{ acme_certs_dir }}/domain.key"
+
+- name: set permissions on domain key
+  file:
+    path: "{{ acme_certs_dir }}/domain.key"
+    owner: root
+    group: root
+    mode: 0440
+
+- name: download the acme-tiny script
+  get_url:
+    url: https://github.com/diafygi/acme-tiny/raw/master/acme_tiny.py
+    dest: /usr/local/bin/acme_tiny.py
+    force: yes
+    owner: root
+    group: acme
+    mode: 0640
+
+- name: create acme log file
+  file:
+    path: /var/log/acme_tiny.log
+    state: touch
+    owner: root
+    group: acme
+    mode: 0660
+
+- name: create folder for acme challenges
+  file:
+    path: "{{ acme_challenge_dir }}/.well-known"
+    state: directory
+    owner: acme
+    group: www-data
+    mode: 0750
+
+- name: add symlink to acme-challenge
+  file:
+    path: "{{ acme_challenge_dir }}/.well-known/acme-challenge"
+    src: "{{ acme_challenge_dir }}"
+    state: link
+
+- name: set up cron script to renew cert every month
+  template:
+    src: etc/cron.monthly/letsencrypt.j2
+    dest: /etc/cron.monthly/letsencrypt_{{ acme_domains[0] | replace('.', '_') }}
+    owner: root
+    group: acme
+    mode: 0750

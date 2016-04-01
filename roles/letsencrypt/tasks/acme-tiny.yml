@@ -1,0 +1,76 @@
+---
+- name: remove old certificate signing request if requested
+  file:
+    path: "{{ acme_certs_dir }}/{{ acme_domains[0] }}/domain.csr"
+    state: absent
+  when: acme_csr_rebuild
+
+- name: generate a certificate signing request
+  shell: openssl req -new -sha256 -key /etc/ssl/letsencrypt/domain.key -subj "/C={{ acme_country }}/O={{ acme_organization }}/CN={{ acme_domains[0] }}" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:{{ acme_domains|join(',DNS:') }}")) -out {{ acme_certs_dir }}/{{ acme_domains[0] }}/domain.csr
+  args:
+    executable: /bin/bash
+    creates: "{{ acme_certs_dir }}/{{ acme_domains[0] }}/domain.csr"
+
+- name: start a simple web server if needed
+  shell: nohup python -m SimpleHTTPServer 80 > /dev/null 2>&1 &
+  args:
+    chdir: "{{ acme_challenge_dir }}"
+
+- name: check if the simple web server is running
+  command: pgrep -f SimpleHTTPServer
+  register: simplehttpserver
+  ignore_errors: yes
+
+- name: open up port 80
+  command: iptables -A INPUT -i {{ ansible_default_ipv4.interface }} -p tcp --dport 80 -m conntrack --ctstate NEW -j ACCEPT
+  when: simplehttpserver.failed is not defined
+
+- name: get a signed certificate
+  shell: sudo -u acme /usr/bin/python /usr/local/bin/acme_tiny.py --account-key {{ acme_certs_dir }}/account.key --csr {{ acme_certs_dir }}/{{ acme_domains[0] }}/domain.csr --acme-dir {{ acme_challenge_dir }} > {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt
+  args:
+    creates: "{{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt"
+  ignore_errors: yes
+
+- name: close port 80
+  command: iptables -D INPUT -i {{ ansible_default_ipv4.interface }} -p tcp --dport 80 -m conntrack --ctstate NEW -j ACCEPT
+  when: simplehttpserver.failed is not defined
+
+- name: stop the simple web server if needed
+  command: pkill -f SimpleHTTPServer
+  ignore_errors: yes
+
+- name: download letsencrypt intermediate cert
+  get_url:
+    url: https://letsencrypt.org/certs/lets-encrypt-x1-cross-signed.pem
+    dest: "{{ acme_certs_dir }}/chain.pem"
+    mode: 0440
+
+- name: check signed certificate is valid
+  command: openssl verify -CAfile {{ acme_certs_dir }}/chain.pem {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt
+  register: certificatevalid
+  ignore_errors: yes
+
+- name: remove signed certificate if not valid
+  file:
+    path: "{{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt"
+    state: absent
+  when: certificatevalid.failed is defined
+
+- name: move signed certificate when valid
+  shell: mv -f {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed.crt
+  when: certificatevalid.failed is not defined
+
+- name: create fullchain.pem from signed.crt and chain.pem
+  shell: cat {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed.crt {{ acme_certs_dir }}/chain.pem > {{ acme_certs_dir }}/{{ acme_domains[0] }}/fullchain.pem
+  when: certificatevalid.failed is not defined
+
+- name: set permissions on domain.csr and fullchain.pem
+  file:
+    path: "{{ acme_certs_dir }}/{{ acme_domains[0] }}/{{ item }}"
+    owner: root
+    group: acme
+    mode: 0440
+  with_items:
+    - domain.csr
+    - fullchain.pem
+  when: certificatevalid.failed is not defined
