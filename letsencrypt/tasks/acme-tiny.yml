@@ -41,7 +41,7 @@
 
 - name: download letsencrypt intermediate cert
   get_url:
-    url: https://letsencrypt.org/certs/lets-encrypt-x1-cross-signed.pem
+    url: https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
     dest: "{{ acme_certs_dir }}/chain.pem"
     mode: 0440
 
