@@ -10,6 +10,7 @@
     - postfix
     - postfix-pcre
     - postfix-policyd-spf-python
+    - pflogsumm
 
 - name: configure mailname
   template:
