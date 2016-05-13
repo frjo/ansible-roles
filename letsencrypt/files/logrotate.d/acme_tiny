@@ -1,0 +1,7 @@
+/var/log/acme_tiny.log {
+  rotate 12
+  monthly
+  compress
+  missingok
+  notifempty
+}

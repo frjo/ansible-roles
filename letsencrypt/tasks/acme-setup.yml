@@ -81,9 +81,27 @@
   file:
     path: /var/log/acme_tiny.log
     state: touch
+    owner: acme
+    group: adm
+    mode: 0640
+
+- name: add acme log file to logcheck
+  lineinfile:
+    dest: /etc/logcheck/logcheck.logfiles
+    line: "/var/log/acme_tiny.log"
+    insertbefore: BOF
+    state: present
+  when: acme_logcheck
+
+- name: configure logrotate for acme
+  copy:
+    src: etc/logrotate.d/{{ item }}
+    dest: /etc/logrotate.d/{{ item }}
     owner: root
-    group: acme
-    mode: 0660
+    group: root
+    mode: 0644
+  with_items:
+    - acme_tiny
 
 - name: create folder for acme challenges
   file:
