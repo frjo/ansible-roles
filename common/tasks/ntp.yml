@@ -1,0 +1,29 @@
+---
+- name: ensure ntp packages are installed
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+    update_cache: yes
+    cache_valid_time: 600
+  with_items:
+    - ntp
+
+- name: configure ntp
+  template:
+    src: etc/ntp.conf.j2
+    dest: /etc/ntp.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart ntp
+  when: ntpserver is defined
+
+- name: ensure all ntp services are started and enabled
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items:
+    - ntp
+

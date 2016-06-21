@@ -1,0 +1,5 @@
+---
+sshport: 22
+openports_list:
+  - 22
+#blacklist_ip_list:

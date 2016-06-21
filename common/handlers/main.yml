@@ -1,0 +1,21 @@
+---
+- name: restart dnsmasq
+  service:
+    name: dnsmasq
+    state: restarted
+
+- name: restart netfilter-persistent
+  service:
+    name: netfilter-persistent
+    state: restarted
+
+- name: restart ntp
+  service:
+    name: ntp
+    state: restarted
+
+- name: restart ssh
+  service:
+    name: ssh
+    state: restarted
+

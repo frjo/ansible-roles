@@ -1,0 +1,9 @@
+user=root
+domain-needed
+bogus-priv
+listen-address=127.0.0.1
+listen-address={{ ansible_default_ipv4.address }}
+{% if ansible_default_ipv6.address is defined %}
+listen-address=::1
+listen-address={{ ansible_default_ipv6.address }}
+{% endif %}

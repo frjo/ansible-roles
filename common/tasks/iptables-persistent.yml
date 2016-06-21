@@ -1,0 +1,46 @@
+---
+- name: ensure iptables packages are installed
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+    update_cache: yes
+    cache_valid_time: 600
+  with_items:
+    - iptables-persistent
+  register: iptablesinstall
+  when: ansible_product_name != "VirtualBox"
+
+- name: configure iptables
+  template:
+    src: etc/iptables/{{ item }}.j2
+    dest: /etc/iptables/{{ item }}
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - testrules.v4
+    - testrules.v6
+  register: iptablesconf
+  when: ansible_product_name != "VirtualBox"
+
+- name: load iptables for ipv4
+  shell: iptables-restore /etc/iptables/testrules.v4 && iptables-save > /etc/iptables/rules.v4
+  when: iptablesconf.changed
+  notify:
+    - restart netfilter-persistent
+
+- name: load iptables for ipv6
+  shell: ip6tables-restore /etc/iptables/testrules.v6 && ip6tables-save > /etc/iptables/rules.v6
+  when: iptablesconf.changed
+  notify:
+    - restart netfilter-persistent
+
+- name: ensure all iptables services are started and enabled
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items:
+    - netfilter-persistent
+  when: iptablesconf.changed
+

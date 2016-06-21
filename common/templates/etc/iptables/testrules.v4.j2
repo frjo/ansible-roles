@@ -1,0 +1,66 @@
+*filter
+# Delete all rules and chains
+-F
+-X
+
+# DROP all by default
+-P INPUT DROP
+-P FORWARD DROP
+-P OUTPUT DROP
+
+{% if blacklist_ip_list is defined %}
+# Blacklist
+-N BLACKLIST
+{% for blacklist_ip in blacklist_ip_list %}
+-A BLACKLIST -s {{ blacklist_ip }} -j DROP
+{% endfor %}
+-A INPUT -j BLACKLIST
+{% endif %}
+
+# Allow loopback
+-A INPUT -i lo -j ACCEPT
+-A OUTPUT -o lo -j ACCEPT
+
+# Force SYN checks
+-A INPUT -p tcp ! --syn -m conntrack --ctstate NEW -j DROP
+
+# Drop all fragments
+-A INPUT -f -j DROP
+
+# Drop XMAS packets
+-A INPUT -p tcp --tcp-flags ALL ALL -j DROP
+
+# Drop NULL packets
+-A INPUT -p tcp --tcp-flags ALL NONE -j DROP
+
+# Drop all packets that are going to broadcast, multicast or anycast address.
+-A INPUT -m addrtype --dst-type BROADCAST -j DROP
+-A INPUT -m addrtype --dst-type MULTICAST -j DROP
+-A INPUT -m addrtype --dst-type ANYCAST -j DROP
+-A INPUT -d 224.0.0.0/4 -j DROP
+
+
+# Allow only ESTABLISHED and RELATED incomming
+-A INPUT -i {{ ansible_default_ipv4.interface }} -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+# Allow all outbound
+-A OUTPUT -o {{ ansible_default_ipv4.interface }} -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+
+# Allow certain inbound ICMP types (ping, traceroute..)
+-A INPUT -i {{ ansible_default_ipv4.interface }} -p icmp --icmp-type destination-unreachable -m limit --limit 1/second -j ACCEPT
+-A INPUT -i {{ ansible_default_ipv4.interface }} -p icmp --icmp-type echo-reply -m limit --limit 1/second -j ACCEPT
+-A INPUT -i {{ ansible_default_ipv4.interface }} -p icmp --icmp-type echo-request -m limit --limit 1/second -j ACCEPT
+-A INPUT -i {{ ansible_default_ipv4.interface }} -p icmp --icmp-type fragmentation-needed -m limit --limit 1/second -j ACCEPT
+-A INPUT -i {{ ansible_default_ipv4.interface }} -p icmp --icmp-type source-quench -m limit --limit 1/second -j ACCEPT
+-A INPUT -i {{ ansible_default_ipv4.interface }} -p icmp --icmp-type time-exceeded -m limit --limit 1/second -j ACCEPT
+
+
+# Allow needed services from anywhere
+-A INPUT -i {{ ansible_default_ipv4.interface }} -p tcp -m multiport --dport {{ openports_list|join(',') }} -m conntrack --ctstate NEW -j ACCEPT
+
+{% if openports_udp_list is defined %}
+{% for openports_udp in openports_udp_list %}
+-A INPUT -i {{ ansible_default_ipv4.interface }} -p udp --dport {{ openports_udp }} -m conntrack --ctstate NEW -j ACCEPT
+{% endfor %}
+{% endif %}
+COMMIT

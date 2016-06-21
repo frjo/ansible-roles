@@ -1,0 +1,17 @@
+---
+- name: configure apt
+  copy:
+    src: etc/apt/sources_{{ ansible_distribution_release }}.list
+    dest: /etc/apt/sources.list
+    owner: root
+    group: root
+    mode: 0644
+  register: sources
+
+- name: add backport repository
+  apt_repository:
+    repo: 'deb http://ftp.debian.org/debian jessie-backports main'
+
+- name: update the package list
+  apt: update_cache=yes
+  when: sources.changed

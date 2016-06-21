@@ -1,0 +1,10 @@
+---
+- include: apt.yml
+- include: apticron.yml
+- include: debsums.yml
+- include: ssh.yml
+- include: mosh.yml
+- include: needrestart.yml
+- include: iptables-persistent.yml
+- include: dnsmasq.yml
+- include: ntp.yml
