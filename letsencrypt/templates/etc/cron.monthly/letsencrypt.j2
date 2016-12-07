@@ -27,20 +27,22 @@ while true; do
       mv -f {{ acme_certs_dir }}/chain_new.pem {{ acme_certs_dir }}/chain.pem
       mv -f {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed.crt
       cat {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed.crt {{ acme_certs_dir }}/chain.pem > {{ acme_certs_dir }}/{{ acme_domains[0] }}/fullchain.pem
-      echo "Acme tiny successfully renewed certificate."
+      echo ""
+      echo "[Success] Acme tiny successfully renewed certificate."
+      echo ""
 
 {% for acme_service in acme_services %}
       systemctl restart {{ acme_service }}
 {% endfor %}
 
     else
-      echo "Acme tiny have problems."
+      echo "[Error] Acme tiny have problems."
     fi
     break
   else
     # Sleep for max 9999 seconds, then try again.
     sleep `tr -cd 0-9 < /dev/urandom | head -c 4`
-    echo "Acme tiny retry triggered."
+    echo "[Notice] Acme tiny retry triggered."
   fi
 done
 
