@@ -117,6 +117,14 @@
     src: "{{ acme_challenge_dir }}"
     state: link
 
+- name: add simplehttpsserver script
+  template:
+    src: usr/local/bin/simplehttpsserver.py.j2
+    dest: /usr/local/bin/simplehttpsserver.py
+    owner: root
+    group: root
+    mode: 0750
+
 - name: set up cron script to renew cert every month
   template:
     src: etc/cron.monthly/letsencrypt.j2

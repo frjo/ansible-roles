@@ -1,0 +1,53 @@
+#!/bin/sh
+# Script to update letsencrypt cert every month.
+
+# Check if we have a web server running.
+PORT443=$(lsof -ti :443 | wc -l)
+
+# If no web server then start one and open port 443.
+if [ $PORT443 = 0 ]; then
+  cd {{ acme_challenge_dir }}
+  nohup python /usr/local/bin/simplehttpsserver.py > /dev/null 2>&1 &
+  iptables -A INPUT -i {{ ansible_default_ipv4.interface }} -p tcp --dport 443 -m conntrack --ctstate NEW -j ACCEPT
+fi
+
+# Get a updated certificate.
+while true; do
+  if sudo -u acme /usr/bin/python /usr/local/bin/acme_tiny.py --account-key {{ acme_certs_dir }}/account.key \
+       --csr {{ acme_certs_dir }}/{{ acme_domains[0] }}/domain.csr \
+       --acme-dir {{ acme_challenge_dir }} \
+       > {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt \
+       2>> /var/log/acme_tiny.log
+  then
+    wget -O - https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem > {{ acme_certs_dir }}/chain_new.pem
+    # Check that the cert is valid.
+    if openssl verify -CAfile {{ acme_certs_dir }}/chain_new.pem \
+        {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt
+    then
+      mv -f {{ acme_certs_dir }}/chain_new.pem {{ acme_certs_dir }}/chain.pem
+      mv -f {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed.crt
+      cat {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed.crt {{ acme_certs_dir }}/chain.pem > {{ acme_certs_dir }}/{{ acme_domains[0] }}/fullchain.pem
+      echo ""
+      echo "[Success] Acme tiny successfully renewed certificate."
+      echo ""
+
+{% for acme_service in acme_services %}
+      systemctl restart {{ acme_service }}
+{% endfor %}
+
+    else
+      echo "[Error] Acme tiny have problems."
+    fi
+    break
+  else
+    # Sleep for max 9999 seconds, then try again.
+    sleep `tr -cd 0-9 < /dev/urandom | head -c 4`
+    echo "[Notice] Acme tiny retry triggered."
+  fi
+done
+
+# Stop temp web server and close port 443 if needed.
+if [ $PORT443 = 0 ]; then
+  iptables -D INPUT -i {{ ansible_default_ipv4.interface }} -p tcp --dport 443 -m conntrack --ctstate NEW -j ACCEPT
+  pkill -f simplehttpsserver
+fi
