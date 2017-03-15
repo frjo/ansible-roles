@@ -8,7 +8,7 @@ Here are some Ansible roles I have built for my own use.
 
 ## Common
 
-Common configurations including things like firewall, dns and ntp. I add this role to all my playbooks, hence the name. Wrote a bit about it in [My first 60 seconds on a server - letting Ansible do the work](https://xdeb.org/node/1615)
+Common configurations including things like firewall, dns and ntp. I add this role to all my playbooks, hence the name. Wrote a bit about it in [My first 2 minutes on a server - letting Ansible do the work](https://xdeb.org/node/1615)
 
 
 ## Letsencrypt
