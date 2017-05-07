@@ -20,6 +20,16 @@
     group: root
     mode: 0644
 
+- name: configure postfix spf
+  template:
+    src: etc/postfix-policyd-spf-python/{{ item }}.j2
+    dest: /etc/postfix-policyd-spf-python/{{ item }}
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - policyd-spf.conf
+
 - name: configure postfix
   template:
     src: etc/postfix/{{ item }}.j2
