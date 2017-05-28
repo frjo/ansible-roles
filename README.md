@@ -8,7 +8,12 @@ Here are some Ansible roles I have built for my own use.
 
 ## Common
 
-Common configurations including things like firewall, dns and ntp. I add this role to all my playbooks, hence the name. Wrote a bit about it in [My first 2 minutes on a server - letting Ansible do the work](https://xdeb.org/node/1615)
+Common configurations including things like firewall, dns and ntp. I add this role to all my playbooks, hence the name. Wrote a bit about it in [My first 2 minutes on a server - letting Ansible do the work](https://xdeb.org/node/1615).
+
+
+## Common Pi
+
+Common configurations for Raspberry Pi (Raspian) including things like firewall, dns and ntp. I add this role to all my Raspberry Pi playbooks, hence the name.
 
 
 ## Letsencrypt
@@ -18,4 +23,9 @@ Create a Letsencrypt cert with the help of the [acme-tiny](https://github.com/di
 
 ## Mail relay och MX backup
 
-Creates servers for [Mail relay och MX backup](https://xdeb.net/mailrelay) service using Debian 8 and Postfix. 
+Creates servers for [Mail relay och MX backup](https://xdeb.net/mailrelay) service using Debian 8 and Postfix.
+
+
+## Security camera
+
+Creates a security camera with a Raspberry Pi (Raspian), the Raspberry Pi Camera and [Motion](https://motion-project.github.io). Tested with Raspberry Pi 3 Model B and Zero W with the Raspberry Camera v2.
