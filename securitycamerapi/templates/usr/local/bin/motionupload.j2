@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+
+FILE=$1
+
+scp -P {{ upload_port }} $FILE {{ upload_user }}@{{ upload_host }}:{{ upload_dir }}

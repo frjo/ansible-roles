@@ -1,0 +1,4 @@
+---
+- include: motion.yml
+  tags:
+    - camera

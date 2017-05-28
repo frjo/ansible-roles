@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+
+curl --silent \
+  --form-string "token={{ pushover_token }}" \
+  --form-string "user={{ pushover_user }}" \
+  --form-string "title={{ pushover_title }}" \
+  --form-string "message={{ pushover_message }}" \
+  --form-string "url={{ pushover_url }}" \
+  --form-string "url_title={{ pushover_url_title }}" \
+  https://api.pushover.net/1/messages.json > /dev/null 2>&1

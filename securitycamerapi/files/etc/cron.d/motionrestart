@@ -1,0 +1,2 @@
+# Restart motion few times per day.
+41 * * * * root systemctl restart motion

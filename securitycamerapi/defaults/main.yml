@@ -1,0 +1,40 @@
+---
+motion_deamon: 'on'
+motion_setup_mode: 'off'
+motion_log_level: 6
+motion_threshold: 5000
+motion_width: 1408
+motion_height: 792
+motion_lightswitch: 50
+motion_minimum_motion_frames: 2
+motion_pre_capture: 2
+motion_post_capture: 2
+motion_max_movie_time: 30
+motion_output_debug_pictures: 'off'
+motion_output_pictures: 'best'
+motion_ffmpeg_output_movies: 'on'
+motion_target_dir: '/var/motion'
+motion_stream_localhost: 'off'
+motion_ffmpeg_video_codec: 'mp4'
+motion_stream_port: 8081
+motion_webcontrol_port: 8080
+motion_webcontrol_localhost: 'on'
+motion_locate_motion_mode: 'off'
+motion_locate_motion_style: 'box'
+motion_smart_mask_speed: 0
+pushover_token: 'set_api_token_here'
+pushover_user: 'set_user_key_here'
+pushover_message: 'Movement was detected'
+pushover_title: 'Pi Camera event'
+pushover_url: 'https://pi.example.org/'
+pushover_url_title: 'Pi Camera stream'
+upload_user: 'pi'
+upload_host: 'example.org'
+upload_dir: 'motion'
+upload_port: 22
+#motion_area_detect: '24568'
+#motion_on_event_start: 'motionpushover'
+#motion_on_area_detected: 'motionpushover'
+#motion_on_picture_save: 'motionupload %f'
+#motion_on_movie_end: 'motionupload %f'
+#motion_mask_file: 'set_full_path_to_mask_file'
