@@ -1,0 +1,9 @@
+---
+- name: copy dot files to root home directory
+  copy:
+    src: files/userdot/
+    dest: /root/
+    owner: root
+    group: root
+    mode: 0644
+

@@ -1,0 +1,21 @@
+---
+- include: busybox.yml
+- include: debsums.yml
+- include: disable-swap.yml
+  tags:
+    - swap
+- include: userdot.yml
+  tags:
+    - user
+- include: ssh.yml
+  tags:
+    - ssh
+- include: mosh.yml
+- include: needrestart.yml
+- include: iptables-persistent.yml
+  tags:
+    - firewall
+- include: dnsmasq.yml
+  tags:
+    - dns
+- include: vim-nox.yml

@@ -1,0 +1,13 @@
+---
+- name: check if we have a swap active
+  command: systemctl is-enabled dphys-swapfile
+  ignore_errors: yes
+  register: swap_state
+
+- name: turn off swap
+  command: dphys-swapfile swapoff
+  when: swap_state.stdout == "enabled"
+
+- name: disable swap
+  command: systemctl disable dphys-swapfile
+  when: swap_state.stdout == "enabled"
