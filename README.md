@@ -15,6 +15,9 @@ Common configurations including things like firewall, dns and ntp. I add this ro
 
 Common configurations for Raspberry Pi (Raspian) including things like firewall, dns and ntp. I add this role to all my Raspberry Pi playbooks, hence the name.
 
+It uses busybox to log only to memory and disables swap. This should make the SD card last longer.
+
+If used with "Security camera" below please remember to add the motion streaming port to the openports_list.
 
 ## Letsencrypt
 
