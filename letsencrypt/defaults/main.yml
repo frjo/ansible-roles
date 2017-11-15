@@ -1,12 +1,12 @@
 ---
-  acme_account_key_passwd: ""
-  acme_csr_rebuild: false
-  acme_logcheck: false
-  acme_certs_dir: /etc/ssl/letsencrypt
-  acme_challenge_dir: /var/www/challenges
-  acme_country: ""
-  acme_organization: ""
-  acme_domains:
-    - "{{ ansible_fqdn }}"
-  acme_services:
-    - postfix
+acme_account_key_passwd: ""
+acme_csr_rebuild: false
+acme_logcheck: false
+acme_certs_dir: /etc/ssl/letsencrypt
+acme_challenge_dir: /var/www/challenges
+acme_country: ""
+acme_organization: ""
+acme_domains:
+  - "{{ ansible_fqdn }}"
+acme_services:
+  - postfix

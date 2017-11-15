@@ -10,7 +10,7 @@
   when: acme_csr_rebuild
 
 - name: generate a certificate signing request
-  shell: openssl req -new -sha256 -key /etc/ssl/letsencrypt/domain.key -subj "/C={{ acme_country }}/O={{ acme_organization }}/CN={{ acme_domains[0] }}" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:{{ acme_domains|join(',DNS:') }}")) -out {{ acme_certs_dir }}/{{ acme_domains[0] }}/domain.csr
+  shell: openssl req -new -sha256 -key {{ acme_certs_dir }}/domain.key -subj "/C={{ acme_country }}/O={{ acme_organization }}/CN={{ acme_domains[0] }}" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:{{ acme_domains|join(',DNS:') }}")) -out {{ acme_certs_dir }}/{{ acme_domains[0] }}/domain.csr
   args:
     executable: /bin/bash
     creates: "{{ acme_certs_dir }}/{{ acme_domains[0] }}/domain.csr"
@@ -21,8 +21,12 @@
     chdir: "{{ acme_challenge_dir }}"
   when: port80.stdout == 0
 
-- name: open up port 80
+- name: open up port 80 ipv4
   command: iptables -A INPUT -i {{ ansible_default_ipv4.interface }} -p tcp --dport 80 -m conntrack --ctstate NEW -j ACCEPT
+  when: port80.stdout == 0
+
+- name: open up port 80 ipv6
+  command: ip6tables -A INPUT -i {{ ansible_default_ipv6.interface }} -p tcp --dport 80 -m conntrack --ctstate NEW -j ACCEPT
   when: port80.stdout == 0
 
 - name: get a signed certificate
@@ -31,8 +35,12 @@
     creates: "{{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt"
   ignore_errors: yes
 
-- name: close port 80
+- name: close port 80 ipv4
   command: iptables -D INPUT -i {{ ansible_default_ipv4.interface }} -p tcp --dport 80 -m conntrack --ctstate NEW -j ACCEPT
+  when: port80.stdout == 0
+
+- name: close port 80 ipv6
+  command: ip6tables -D INPUT -i {{ ansible_default_ipv6.interface }} -p tcp --dport 80 -m conntrack --ctstate NEW -j ACCEPT
   when: port80.stdout == 0
 
 - name: stop the simple web server if needed
@@ -43,29 +51,27 @@
 - name: download letsencrypt intermediate cert
   get_url:
     url: https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
-    dest: "{{ acme_certs_dir }}/chain.pem"
+    dest: "{{ acme_certs_dir }}/chain_new.pem"
     mode: 0440
 
 - name: check signed certificate is valid
-  command: openssl verify -CAfile {{ acme_certs_dir }}/chain.pem {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt
+  command: openssl verify -CAfile {{ acme_certs_dir }}/chain_new.pem {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt
   register: certificatevalid
   ignore_errors: yes
 
-- name: remove signed certificate if not valid
-  file:
-    path: "{{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt"
-    state: absent
-  when: certificatevalid.failed is defined
+- name: move intermediate cert when valid
+  shell: mv -f {{ acme_certs_dir }}/chain_new.pem {{ acme_certs_dir }}/chain.pem
+  when: certificatevalid|succeeded
 
 - name: move signed certificate when valid
   shell: mv -f {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed.crt
-  when: certificatevalid.failed is not defined
+  when: certificatevalid|succeeded
 
 - name: create fullchain.pem from signed.crt and chain.pem
   shell: cat {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed.crt {{ acme_certs_dir }}/chain.pem > {{ acme_certs_dir }}/{{ acme_domains[0] }}/fullchain.pem
-  when: certificatevalid.failed is not defined
+  when: certificatevalid|succeeded
 
-- name: set permissions on domain.csr and fullchain.pem
+- name: set permissions on domain.csr
   file:
     path: "{{ acme_certs_dir }}/{{ acme_domains[0] }}/{{ item }}"
     owner: root
@@ -73,5 +79,16 @@
     mode: 0440
   with_items:
     - domain.csr
-    - fullchain.pem
-  when: certificatevalid.failed is not defined
+  ignore_errors: yes
+
+- name: remove intermediate cert if not valid
+  file:
+    path: "{{ acme_certs_dir }}/chain_new.pem"
+    state: absent
+  when: certificatevalid|failed
+
+- name: remove signed certificate if not valid
+  file:
+    path: "{{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt"
+    state: absent
+  when: certificatevalid|failed

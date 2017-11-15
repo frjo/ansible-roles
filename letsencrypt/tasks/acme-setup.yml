@@ -125,6 +125,14 @@
     group: root
     mode: 0750
 
+- name: add simpleipv6server script
+  template:
+    src: usr/local/bin/simpleipv6server.py.j2
+    dest: /usr/local/bin/simpleipv6server.py
+    owner: root
+    group: root
+    mode: 0750
+
 - name: set up cron script to renew cert every month
   template:
     src: etc/cron.monthly/letsencrypt.j2

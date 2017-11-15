@@ -9,6 +9,7 @@ if [ $PORT443 = 0 ]; then
   cd {{ acme_challenge_dir }}
   nohup python /usr/local/bin/simplehttpsserver.py > /dev/null 2>&1 &
   iptables -A INPUT -i {{ ansible_default_ipv4.interface }} -p tcp --dport 443 -m conntrack --ctstate NEW -j ACCEPT
+  ip6tables -A INPUT -i {{ ansible_default_ipv6.interface }} -p tcp --dport 443 -m conntrack --ctstate NEW -j ACCEPT
 fi
 
 # Get a updated certificate.
@@ -49,5 +50,6 @@ done
 # Stop temp web server and close port 443 if needed.
 if [ $PORT443 = 0 ]; then
   iptables -D INPUT -i {{ ansible_default_ipv4.interface }} -p tcp --dport 443 -m conntrack --ctstate NEW -j ACCEPT
+  ip6tables -D INPUT -i {{ ansible_default_ipv6.interface }} -p tcp --dport 443 -m conntrack --ctstate NEW -j ACCEPT
   pkill -f simplehttpsserver
 fi
