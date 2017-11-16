@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# Check disk space
+CURRENT=$(df / --output=pcent | tail --lines=1 | cut --delimiter='%' --field=1)
+THRESHOLD=90
+ADMIN="root@{{ ansible_domain }}"
+SUBJECT="[Disk Space Alert] The free space on {{ ansible_fqdn }} is critically low"
+MESSAGE=
+
+if [ "$CURRENT" -gt "$THRESHOLD" ]; then
+  mail -s "$SUBJECT" "$ADMIN" << EOF
+Your root partition remaining free space is critically low. Used: $CURRENT%
+EOF
+fi

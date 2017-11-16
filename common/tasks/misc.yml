@@ -1,0 +1,7 @@
+---
+- name: check if letsencrypt certs are in place
+  stat:
+    path: "{{ acme_certs_dir }}"
+  register: acme_certs_dir
+  tags:
+    - always

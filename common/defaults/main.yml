@@ -1,4 +1,5 @@
 ---
+acme_certs_dir: /etc/ssl/letsencrypt
 sshport: 22
 openports_list:
   - 22

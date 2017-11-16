@@ -1,0 +1,25 @@
+---
+- name: copy dot files to root home directory
+  copy:
+    src: files/userdot/
+    dest: /root/
+    owner: root
+    group: root
+    mode: 0644
+
+- name: copy dot files to skel directory
+  copy:
+    src: files/userdot/
+    dest: /etc/skel/
+    owner: root
+    group: root
+    mode: 0644
+
+- name: copy dot files to vagrant home directory
+  copy:
+    src: files/userdot/
+    dest: /home/vagrant/
+    owner: vagrant
+    group: vagrant
+    mode: 0644
+  when: ansible_product_name == "VirtualBox"

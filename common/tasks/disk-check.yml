@@ -1,0 +1,8 @@
+---
+- name: set up check disk space cron script
+  template:
+    src: etc/cron.hourly/check-disk-space.sh.j2
+    dest: /etc/cron.hourly/check-disk-space.sh
+    owner: root
+    group: root
+    mode: 0750

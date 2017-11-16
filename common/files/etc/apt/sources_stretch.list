@@ -1,0 +1,13 @@
+# deb http://deb.debian.org/debian stretch main non-free
+# deb-src http://deb.debian.org/debian stretch main non-free
+# deb http://security.debian.org/ stretch/updates main non-free
+# deb-src http://security.debian.org/ stretch/updates main non-free
+
+deb http://mirrors.glesys.net/debian stretch main non-free
+deb-src http://mirrors.glesys.net/debian stretch main non-free
+
+deb http://mirrors.glesys.net/debian stretch-updates main non-free
+deb-src http://mirrors.glesys.net/debian stretch-updates main non-free
+
+deb http://security.debian.org/ stretch/updates main non-free
+deb-src http://security.debian.org/ stretch/updates main non-free
