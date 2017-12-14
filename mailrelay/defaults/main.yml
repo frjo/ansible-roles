@@ -1,4 +1,5 @@
 ---
+acme_certs_dir: /etc/ssl/letsencrypt
 acme_domains:
   - "{{ ansible_fqdn }}"
 openports_list:

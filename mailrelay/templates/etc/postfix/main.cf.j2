@@ -18,6 +18,10 @@ append_dot_mydomain = no
 
 readme_directory = no
 
+# See http://www.postfix.org/COMPATIBILITY_README.html -- default to 2 on
+# fresh installs.
+compatibility_level = 2
+
 # TLS parameters
 smtp_tls_security_level = may
 smtp_tls_note_starttls_offer = yes
@@ -25,9 +29,9 @@ smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 smtp_tls_exclude_ciphers = EXPORT, LOW
 smtpd_tls_auth_only = yes
 smtpd_tls_security_level = may
-smtpd_tls_cert_file=/etc/ssl/letsencrypt/{{ acme_domains[0] }}/signed.crt
-smtpd_tls_key_file=/etc/ssl/letsencrypt/domain.key
-smtpd_tls_CAfile=/etc/ssl/letsencrypt/chain.pem
+smtpd_tls_cert_file={{ acme_certs_dir }}/{{ acme_domains[0] }}/signed.crt
+smtpd_tls_key_file={{ acme_certs_dir }}/domain.key
+smtpd_tls_CAfile={{ acme_certs_dir }}/chain.pem
 smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
 smtpd_tls_exclude_ciphers = EXPORT, LOW
 smtpd_tls_received_header = yes
@@ -45,11 +49,14 @@ mydestination = {{ ansible_fqdn }}, localhost.{{ ansible_fqdn }}, localhost
 mynetworks_style = host
 mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
 alias_maps = hash:/etc/aliases
+alias_database = hash:/etc/aliases
 local_recipient_maps =
 relayhost =
 mailbox_size_limit = 0
 recipient_delimiter = +
 inet_interfaces = all
+inet_protocols = all
+
 smtpd_recipient_limit = 100
 message_size_limit = 25600000
 maximal_queue_lifetime = 10d
