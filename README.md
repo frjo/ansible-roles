@@ -3,7 +3,7 @@
 Here are some Ansible roles I have built for my own use.
 
 - Requires Ansible 2.x
-- Expects Debian 8 hosts
+- Expects Debian 9 hosts
 
 
 ## Common

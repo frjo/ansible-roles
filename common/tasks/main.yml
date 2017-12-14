@@ -1,13 +1,23 @@
 ---
 - include: apt.yml
+  tags:
+    - apt
 - include: apticron.yml
 - include: debsums.yml
 - include: disk-check.yml
+  tags:
+    - disk
 - include: userdot.yml
+  tags:
+    - user
 - include: mosh.yml
 - include: needrestart.yml
 - include: iptables-persistent.yml
+  tags:
+    - firewall
 - include: dnsmasq.yml
-- include: ntp.yml
+  tags:
+    - dns
+#- include: ntp.yml
 - include: vim-nox.yml
 - include: misc.yml
