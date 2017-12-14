@@ -8,45 +8,51 @@
     path: "{{ acme_certs_dir }}/{{ acme_domains[0] }}/domain.csr"
     state: absent
   when: acme_csr_rebuild
+  tags:
+    - csrrebuild
 
 - name: generate a certificate signing request
   shell: openssl req -new -sha256 -key {{ acme_certs_dir }}/domain.key -subj "/C={{ acme_country }}/O={{ acme_organization }}/CN={{ acme_domains[0] }}" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:{{ acme_domains|join(',DNS:') }}")) -out {{ acme_certs_dir }}/{{ acme_domains[0] }}/domain.csr
   args:
     executable: /bin/bash
     creates: "{{ acme_certs_dir }}/{{ acme_domains[0] }}/domain.csr"
+  tags:
+    - csrrebuild
 
 - name: start a simple web server if needed
   shell: nohup python -m SimpleHTTPServer 80 > /dev/null 2>&1 &
   args:
     chdir: "{{ acme_challenge_dir }}"
-  when: port80.stdout == 0
+  when: port80.stdout == "0"
 
 - name: open up port 80 ipv4
   command: iptables -A INPUT -i {{ ansible_default_ipv4.interface }} -p tcp --dport 80 -m conntrack --ctstate NEW -j ACCEPT
-  when: port80.stdout == 0
+  when: port80.stdout == "0"
 
 - name: open up port 80 ipv6
   command: ip6tables -A INPUT -i {{ ansible_default_ipv6.interface }} -p tcp --dport 80 -m conntrack --ctstate NEW -j ACCEPT
-  when: port80.stdout == 0
+  when: port80.stdout == "0"
 
 - name: get a signed certificate
-  shell: sudo -u acme /usr/bin/python /usr/local/bin/acme_tiny.py --account-key {{ acme_certs_dir }}/account.key --csr {{ acme_certs_dir }}/{{ acme_domains[0] }}/domain.csr --acme-dir {{ acme_challenge_dir }} > {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt
+  shell: /usr/bin/python /usr/local/bin/acme_tiny.py --account-key {{ acme_certs_dir }}/account.key --csr {{ acme_certs_dir }}/{{ acme_domains[0] }}/domain.csr --acme-dir {{ acme_challenge_dir }} > {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt
+  become: true
+  become_user: acme
   args:
     creates: "{{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt"
   ignore_errors: yes
 
 - name: close port 80 ipv4
   command: iptables -D INPUT -i {{ ansible_default_ipv4.interface }} -p tcp --dport 80 -m conntrack --ctstate NEW -j ACCEPT
-  when: port80.stdout == 0
+  when: port80.stdout == "0"
 
 - name: close port 80 ipv6
   command: ip6tables -D INPUT -i {{ ansible_default_ipv6.interface }} -p tcp --dport 80 -m conntrack --ctstate NEW -j ACCEPT
-  when: port80.stdout == 0
+  when: port80.stdout == "0"
 
 - name: stop the simple web server if needed
   command: pkill -f SimpleHTTPServer
   ignore_errors: yes
-  when: port80.stdout == 0
+  when: port80.stdout == "0"
 
 - name: download letsencrypt intermediate cert
   get_url:
