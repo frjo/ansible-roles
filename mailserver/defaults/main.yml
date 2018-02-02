@@ -1,0 +1,7 @@
+---
+acme_domains:
+  - "{{ ansible_fqdn }}"
+acme_certs_dir: /etc/ssl/letsencrypt
+postfixadminversion: postfixadmin-2.93
+mailman_install: false
+zen_rbl: zen.spamhaus.org

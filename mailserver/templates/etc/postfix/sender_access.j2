@@ -1,0 +1,9 @@
+# /etc/postfix/sender_access
+# run "postmap /etc/postfix/sender_access" after each edit
+# joe@example.com      PERMIT/REJECT
+
+{% if sender_access is defined %}
+{% for sender in sender_access %}
+{{ sender.address }}  {{ sender.access }}
+{% endfor %}
+{% endif %}

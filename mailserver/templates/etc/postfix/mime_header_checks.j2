@@ -1,0 +1,7 @@
+# /etc/postfix/mime_header_checks
+#
+# /^HEADER:.*content_to_act_on/ ACTION [MESSAGE]
+
+/^Content-(Disposition|Type).*name\s*=\s*"?(.*\.(bat|com|exe|jar|pif|scr|swf))"?([^\.\w]|$)/x
+  REJECT Attachment name "$2" may not end with ".$3".
+    You might try sending this as a zip file instead.

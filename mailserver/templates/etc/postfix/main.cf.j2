@@ -1,0 +1,165 @@
+# See /usr/share/postfix/main.cf.dist for a commented, more complete version
+
+
+# Debian specific:  Specifying a file name will cause the first
+# line of that file to be used as the name.  The Debian default
+# is /etc/mailname.
+#myorigin = /etc/mailname
+
+#smtpd_banner = $myhostname ESMTP $mail_name (Debian/GNU)
+smtpd_banner = $myhostname ESMTP
+biff = no
+
+# appending .domain is the MUA's job.
+append_dot_mydomain = no
+
+# Uncomment the next line to generate "delayed mail" warnings
+#delay_warning_time = 4h
+
+readme_directory = no
+
+# See http://www.postfix.org/COMPATIBILITY_README.html -- default to 2 on
+# fresh installs.
+compatibility_level = 2
+
+# TLS parameters
+smtp_tls_security_level = may
+smtp_tls_note_starttls_offer = yes
+smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
+smtp_tls_exclude_ciphers = EXPORT, LOW
+smtpd_tls_auth_only = yes
+smtpd_tls_security_level = may
+smtpd_tls_cert_file={{ acme_certs_dir }}/{{ acme_domains[0] }}/signed.crt
+smtpd_tls_key_file={{ acme_certs_dir }}/domain.key
+smtpd_tls_CAfile={{ acme_certs_dir }}/chain.pem
+smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
+smtpd_tls_exclude_ciphers = EXPORT, LOW
+smtpd_tls_received_header = yes
+smtpd_tls_dh1024_param_file = /etc/postfix/dh2048.pem
+smtpd_tls_dh512_param_file = /etc/postfix/dh512.pem
+#smtpd_tls_loglevel = 1
+tls_preempt_cipherlist = yes
+
+# See /usr/share/doc/postfix/TLS_README.gz in the postfix-doc package for
+# information on enabling SSL in the smtp client.
+
+myhostname = {{ mail_server_name | default('mail') }}.{{ ansible_domain }}
+myorigin = /etc/mailname
+mydestination = localhost.{{ ansible_domain }}, localhost
+mynetworks_style = host
+mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
+{% if mailman_install %}
+alias_maps = hash:/etc/aliases, hash:/var/lib/mailman/data/aliases
+alias_database = hash:/etc/aliases, hash:/var/lib/mailman/data/aliases
+{% else %}
+alias_maps = hash:/etc/aliases
+alias_database = hash:/etc/aliases
+{% endif %}
+local_recipient_maps =
+relayhost =
+mailbox_size_limit = 0
+recipient_delimiter = +
+inet_interfaces = all
+inet_protocols = all
+
+smtpd_recipient_limit = 100
+message_size_limit = 25600000
+
+# SASL settings
+smtpd_sasl_auth_enable = yes
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = private/auth
+smtpd_sasl_authenticated_header = yes
+
+# Require proper helo at connections.
+smtpd_helo_required = yes
+
+# Disable the SMTP VRFY command.
+disable_vrfy_command = yes
+
+# Postscreen
+postscreen_greet_action = enforce
+postscreen_dnsbl_action = enforce
+postscreen_blacklist_action = enforce
+postscreen_access_list = permit_mynetworks, cidr:/etc/postfix/client_access.cidr
+postscreen_dnsbl_sites = {{ zen_rbl }}, b.barracudacentral.org
+postscreen_dnsbl_reply_map = texthash:/etc/postfix/postscreen_dnsbl_reply_map
+postscreen_cache_map = proxy:btree:$data_directory/postscreen_cache
+
+# Filter on content in headers.
+header_checks = pcre:/etc/postfix/header_checks
+# Filter on content in mime headers
+mime_header_checks = pcre:/etc/postfix/mime_header_checks
+# Only on outgoing mail.
+smtp_header_checks = pcre:/etc/postfix/smtp_header_checks
+
+# Requirements for the HELO statement
+smtpd_helo_restrictions =
+  permit_mynetworks,
+  reject_non_fqdn_helo_hostname,
+  reject_invalid_helo_hostname,
+  check_helo_access hash:/etc/postfix/helo_access,
+  permit
+
+# Requirements for the sender details
+smtpd_sender_restrictions =
+  permit_mynetworks,
+  permit_sasl_authenticated,
+  reject_non_fqdn_sender,
+  reject_unknown_sender_domain,
+  permit
+
+# Requirement for the recipient address.
+smtpd_recipient_restrictions =
+  reject_unauth_pipelining,
+  reject_non_fqdn_recipient,
+  reject_unknown_recipient_domain,
+  permit_mynetworks,
+  permit_sasl_authenticated,
+  check_recipient_access hash:/etc/postfix/recipient_access,
+  check_sender_access hash:/etc/postfix/sender_access,
+  check_client_access cidr:/etc/postfix/client_access.cidr,
+  reject_unknown_reverse_client_hostname,
+  reject_rbl_client {{ zen_rbl }}=127.0.0.10,
+  reject_rbl_client {{ zen_rbl }}=127.0.0.11,
+  reject_rbl_client {{ zen_rbl }},
+  reject_rbl_client b.barracudacentral.org,
+  reject_unlisted_recipient,
+  check_policy_service unix:private/policyd-spf,
+  permit
+
+smtpd_relay_restrictions =
+  permit_mynetworks,
+  permit_sasl_authenticated,
+  reject_unauth_destination
+
+# Requirements for the SMTP DATA.
+smtpd_data_restrictions = reject_unauth_pipelining
+
+# python-policyd-spf
+policyd-spf_time_limit = 3600
+
+# RBL response templates
+rbl_reply_maps = hash:/etc/postfix/rbl_reply_maps
+
+smtpd_discard_ehlo_keyword_address_maps = cidr:/etc/postfix/discard_ehlo_map.cidr
+
+proxy_read_maps = $local_recipient_maps $mydestination $virtual_alias_maps $virtual_alias_domains $virtual_mailbox_maps $virtual_mailbox_domains $relay_recipient_maps $relay_domains $canonical_maps $sender_canonical_maps $recipient_canonical_maps $relocated_maps $transport_maps $mynetworks
+virtual_minimum_uid = 5000
+virtual_gid_maps = static:5000
+virtual_uid_maps = static:5000
+virtual_mailbox_base = /var/spool/vmail
+virtual_alias_domains =
+{% if mailman_install %}
+virtual_alias_maps = proxy:mysql:/etc/postfix/mysql_virtual_alias_maps.cf, hash:/var/lib/mailman/data/virtual-mailman
+{% else %}
+virtual_alias_maps = proxy:mysql:/etc/postfix/mysql_virtual_alias_maps.cf
+{% endif %}
+virtual_mailbox_domains = proxy:mysql:/etc/postfix/mysql_virtual_domains_maps.cf
+virtual_mailbox_maps = proxy:mysql:/etc/postfix/mysql_virtual_mailbox_maps.cf
+virtual_transport = dovecot
+
+dovecot_destination_recipient_limit = 1
+
+default_destination_concurrency_limit = 5
+relay_destination_concurrency_limit = 1

@@ -1,0 +1,10 @@
+# /etc/postfix/helo_access
+# Reject anybody that HELO's as being in our own domains/IP
+# run "postmap /etc/postfix/helo_access" after each edit
+# example.com    PERMIT/REJECT
+
+{% if helo_access is defined %}
+{% for helo in helo_access %}
+{{ helo.address }}    {{ helo.access }}
+{% endfor %}
+{% endif %}

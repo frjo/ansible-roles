@@ -1,0 +1,6 @@
+---
+- include: postfix.yml
+- include: dovecot.yml
+  tags:
+    - dovecot
+- include: postfixadmin.yml

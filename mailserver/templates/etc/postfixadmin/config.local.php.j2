@@ -1,0 +1,41 @@
+<?php
+
+$CONF['configured'] = true;
+$CONF['setup_password'] = '763c4de937e0236cb48211182ef7d13b:44f614065208e78c805501cd290f522c76777cec';
+$CONF['database_type'] = 'mysqli';
+$CONF['database_host'] = 'localhost';
+$CONF['database_user'] = $_SERVER['DB_USER'];
+$CONF['database_password'] = $_SERVER['DB_PASS'];
+$CONF['database_name'] = 'postfix';
+$CONF['admin_email'] = 'postmaster@{{ ansible_domain }}';
+$CONF['encrypt'] = 'dovecot:SHA512-CRYPT';
+$CONF['dovecotpw'] = "/usr/bin/doveadm pw";
+$CONF['password_validation'] = array(
+#    '/regular expression/' => '$PALANG key (optional: + parameter)',
+    '/.{14}/'               => 'password_too_short 15',     # minimum length 14 characters
+    '/([a-zA-Z].*){4}/'     => 'password_no_characters 4',  # must contain at least 4 characters
+);
+$CONF['generate_password'] = 'YES';
+$CONF['page_size'] = '50';
+$CONF['default_aliases'] = array (
+    'abuse' => 'abuse@{{ ansible_domain }}',
+    'hostmaster' => 'hostmaster@{{ ansible_domain }}',
+    'postmaster' => 'postmaster@{{ ansible_domain }}',
+    'webmaster' => 'webmaster@{{ ansible_domain }}'
+);
+$CONF['domain_path'] = 'YES';
+$CONF['domain_in_mailbox'] = 'NO';
+$CONF['aliases'] = '100';
+$CONF['mailboxes'] = '100';
+$CONF['maxquota'] = '1024';
+$CONF['domain_quota_default'] = '10240';
+$CONF['alias_domain'] = 'NO';
+$CONF['fetchmail'] = 'NO';
+$CONF['show_footer_text'] = 'NO';
+$CONF['show_undeliverable']='NO';
+$CONF['show_status']='NO';
+$CONF['welcome_text'] = <<<EOM
+Hi,
+
+Welcome to your new account at {{ ansible_domain }}.
+EOM;

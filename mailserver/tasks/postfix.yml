@@ -1,0 +1,159 @@
+---
+- name: ensure postfix packages are installed
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+    update_cache: yes
+    cache_valid_time: 600
+  register: postfixinstall
+  with_items:
+    - postfix
+    - postfix-mysql
+    - postfix-pcre
+    - postfix-policyd-spf-python
+    - pflogsumm
+  tags:
+    - postfix
+
+- name: configure mailname
+  template:
+    src: etc/mailname.j2
+    dest: /etc/mailname
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - postfix
+
+- name: set up vmail group
+  group:
+    name: vmail
+    gid: 5000
+    state: present
+
+- name: set up vmail user with home dir
+  user:
+    name: vmail
+    uid: 5000
+    group: vmail
+    shell: /bin/false
+    home: /var/spool/vmail
+    createhome: no
+    state: present
+
+- name: create vmail folder
+  file:
+    path: /var/spool/vmail
+    state: directory
+    owner: vmail
+    group: vmail
+    mode: 0770
+
+- name: configure postfix
+  template:
+    src: etc/postfix/{{ item }}.j2
+    dest: /etc/postfix/{{ item }}
+    owner: root
+    group: root
+    mode: 0644
+  register: postfixconf
+  with_items:
+    - client_access.cidr
+    - discard_ehlo_map.cidr
+    - header_checks
+    - helo_access
+    - main.cf
+    - master.cf
+    - mime_header_checks
+    - postscreen_dnsbl_reply_map
+    - rbl_reply_maps
+    - recipient_access
+    - sender_access
+    - smtp_header_checks
+  notify:
+    - restart postfix
+  tags:
+    - postfix
+
+- name: configure postfix mysql connection
+  template:
+    src: etc/postfix/{{ item }}.j2
+    dest: /etc/postfix/{{ item }}
+    owner: root
+    group: postfix
+    mode: 0640
+  with_items:
+    - mysql_relay_domains_maps.cf
+    - mysql_virtual_alias_maps.cf
+    - mysql_virtual_domains_maps.cf
+    - mysql_virtual_mailbox_limit_maps.cf
+    - mysql_virtual_mailbox_maps.cf
+  notify:
+    - restart postfix
+  when: postfix_db_passwd != ""
+  tags:
+    - postfix
+
+- name: run postmap on hash files
+  command: postmap /etc/postfix/{{ item }}
+  with_items:
+    - helo_access
+    - rbl_reply_maps
+    - recipient_access
+    - sender_access
+  when: postfixconf.changed
+  notify:
+    - restart postfix
+  tags:
+    - postfix
+
+- name: generate dh* param keys.
+  shell: openssl dhparam -out dh{{ item }}.tmp {{ item }} && mv dh{{ item }}.tmp /etc/postfix/dh{{ item }}.pem
+  with_items:
+    - 512
+    - 1024
+    - 2048
+  when: postfixinstall.changed
+  notify:
+    - restart postfix
+
+- name: create folder to give postfix access to mysql.sock
+  file:
+    path: /var/spool/postfix/var/run
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: create mount to give postfix access to mysql.sock
+  mount:
+    name: /var/spool/postfix/var/run/mysqld
+    src: /var/run/mysqld
+    fstype: bind
+    opts: noauto,bind
+    state: mounted
+
+- name: add rc.local with create /var/run/mysqld dir and mount command
+  copy:
+    src: etc/rc.local
+    dest: /etc/rc.local
+    owner: root
+    group: root
+    mode: 0755
+  tags:
+    - rclocal
+
+- name: enable service rc.local
+  systemd:
+    name: rc.local
+    enabled: yes
+  tags:
+    - rclocal
+
+- name: ensure all postfix services are started and enabled
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items:
+    - postfix

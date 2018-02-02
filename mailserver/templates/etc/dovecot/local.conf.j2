@@ -1,0 +1,94 @@
+auth_cache_size = 1M
+auth_cache_ttl = 1 hour
+auth_cache_negative_ttl = 1 hour
+
+disable_plaintext_auth = yes
+auth_mechanisms = plain login
+
+mail_uid = vmail
+mail_gid = vmail
+
+mail_location = maildir:/var/spool/vmail/%d/%n
+
+default_process_limit = 150
+
+ssl = required
+
+ssl_protocols = !SSLv3
+
+{% if acme_certs_dir_check.stat.isdir is defined %}
+ssl_cert = <{{ acme_certs_dir }}/{{ acme_domains[0] }}/fullchain.pem
+ssl_key = <{{ acme_certs_dir }}/domain.key
+{% endif %}
+
+protocol imap {
+  mail_max_userip_connections = 30
+}
+
+namespace inbox {
+  separator = .
+  inbox = yes
+
+  mailbox Drafts {
+    special_use = \Drafts
+  }
+  mailbox Junk {
+    special_use = \Junk
+  }
+  mailbox Sent {
+    special_use = \Sent
+  }
+  mailbox "Sent Messages" {
+    special_use = \Sent
+  }
+  mailbox Trash {
+    special_use = \Trash
+  }
+}
+
+passdb {
+  driver = sql
+  args = /etc/dovecot/local-sql.conf
+}
+
+userdb {
+  driver = static
+  args = uid=vmail gid=vmail home=/var/spool/vmail/%d/%n
+}
+
+service imap-login {
+  # Number of processes to always keep waiting for more connections.
+  process_min_avail = 2
+}
+
+service lmtp {
+  unix_listener /var/spool/postfix/private/dovecot-lmtp {
+    mode = 0666
+    group = postfix
+    user = postfix
+  }
+
+  user = vmail
+}
+
+service auth {
+  unix_listener auth-userdb {
+    mode = 0666
+    user = vmail
+    group = vmail
+  }
+
+  # Postfix smtp-auth
+  unix_listener /var/spool/postfix/private/auth {
+    mode = 0666
+    user = postfix
+    group = postfix
+  }
+
+  # Auth process is run as this user.
+  user = $default_internal_user
+}
+
+service auth-worker {
+  user = $default_internal_user
+}

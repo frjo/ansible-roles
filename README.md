@@ -29,6 +29,16 @@ Create a Letsencrypt cert with the help of the [acme-tiny](https://github.com/di
 Read more in my blog post [Let's Encrypt my servers with acme tiny](https://xdeb.org/post/2016/02/09/lets-encrypt-my-servers-with-acme-tiny/).
 
 
+## Mail server
+
+A mail server built with postfix and dovecot. Support multiple domains and virtual mailboxes and aliases in a sql database. Administration via the postfix admin web interface.
+
+
+
+Use together with the common and dbserver roles.
+
+Provides a Apache vhost conf file as well but you need to install Apache separately.
+
 ## Mail relay och MX backup
 
 Creates servers for [Mail relay och MX backup](https://xdeb.net/mailrelay) service using Debian 9 and Postfix.

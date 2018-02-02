@@ -1,0 +1,114 @@
+---
+- name: ensure postfixadmin support packages are installed
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+    update_cache: yes
+    cache_valid_time: 600
+  with_items:
+    - php-imap
+  tags:
+    - postfixadmin
+
+- name: create folder for admin www
+  file:
+    path: /var/www/admin
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  tags:
+    - postfixadmin
+
+- name: check if postfixadmin has been downloaded
+  stat:
+    path: /usr/local/share/{{ postfixadminversion }}
+  register: postfixadmin
+  tags:
+    - postfixadmin
+
+- name: download and unpack postfixadmin
+  unarchive:
+    src: https://downloads.sourceforge.net/project/postfixadmin/postfixadmin/{{ postfixadminversion }}/{{ postfixadminversion }}.tar.gz
+    dest: /usr/local/share
+    copy: no
+    owner: root
+    group: www-data
+    mode: "g-w,o-rwx"
+    creates: /usr/local/share/{{ postfixadminversion }}
+  when: postfixadmin.stat.isdir is not defined
+  register: postfixadmininstall
+  tags:
+    - postfixadmin
+
+- name: make templates_c writeble by web server
+  file:
+    path: /usr/local/share/{{ postfixadminversion }}/templates_c
+    state: directory
+    owner: root
+    group: www-data
+    mode: 0770
+  tags:
+    - postfixadmin
+
+- name: make symlink for postfixadmin
+  file:
+    src: /usr/local/share/{{ postfixadminversion }}
+    dest: /var/www/admin/epostadmin
+    state: link
+    owner: root
+    group: www-data
+  tags:
+    - postfixadmin
+
+- name: configure postfixadmin
+  template:
+    src: etc/postfixadmin/config.local.php.j2
+    dest: /usr/local/share/{{ postfixadminversion }}/config.local.php
+    owner: root
+    group: www-data
+    mode: 0640
+  tags:
+    - postfixadmin
+    - postfixadminconf
+
+- name: create database for mail server
+  mysql_db:
+    name: postfix
+    state: present
+    login_password: "{{ db_root_passwd }}"
+    login_user: root
+  when: db_root_passwd != ""
+
+- name: create mysql read only user for mail database
+  mysql_user:
+    name: postfix
+    host: localhost
+    password: "{{ postfix_db_passwd }}"
+    priv: postfix.*:SELECT
+    state: present
+    login_password: "{{ db_root_passwd }}"
+    login_user: root
+  when: postfix_db_passwd != "" and db_root_passwd != ""
+
+- name: create mysql admin user for mail database
+  mysql_user:
+    name: postfixadmin
+    host: localhost
+    password: "{{ postfix_admin_db_passwd }}"
+    priv: postfix.*:ALL
+    state: present
+    login_password: "{{ db_root_passwd }}"
+    login_user: root
+  when: postfix_admin_db_passwd != "" and db_root_passwd != ""
+
+- name: add mail vhosts to apache
+  template:
+    src: etc/apache2/sites-available/{{ item }}.j2
+    dest: /etc/apache2/sites-available/{{ item }}
+    owner: root
+    group: root
+    mode: 0640
+  with_items:
+    - mail.conf
+  when: postfix_admin_db_passwd != ""

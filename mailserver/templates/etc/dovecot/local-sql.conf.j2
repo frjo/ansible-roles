@@ -1,0 +1,4 @@
+driver = mysql
+connect = host=localhost dbname=postfix user=postfix password={{ postfix_db_passwd }}
+default_pass_scheme = SHA512-CRYPT
+password_query = SELECT username AS user, password FROM mailbox WHERE username = '%u' AND active = '1'

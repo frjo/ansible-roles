@@ -1,0 +1,8 @@
+user = postfix
+password = {{ postfix_db_passwd }}
+hosts = localhost
+dbname = postfix
+table = domain
+select_field = domain
+where_field = domain
+additional_conditions = and backupmx = '0' and active = '1'

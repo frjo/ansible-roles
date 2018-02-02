@@ -1,0 +1,75 @@
+<VirtualHost *:80>
+  ServerName {{ mail_server_name | default('mail') }}.{{ ansible_domain }}
+  Redirect permanent / https://{{ mail_server_name | default('mail') }}.{{ ansible_domain }}/
+</VirtualHost>
+
+<VirtualHost *:443>
+  <IfModule mod_http2.c>
+    Protocols h2 http/1.1
+  </IfModule>
+
+  <IfModule mod_ssl.c>
+    SSLEngine on
+    SSLCertificateFile {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed.crt
+    SSLCertificateKeyFile {{ acme_certs_dir }}/domain.key
+    SSLCertificateChainFile {{ acme_certs_dir }}/chain.pem
+    <IfModule mod_headers.c>
+      Header always set Strict-Transport-Security: "max-age=15768000"
+    </IfModule>
+  </IfModule>
+
+  DocumentRoot /var/www/admin
+  ServerName {{ mail_server_name | default('mail') }}.{{ ansible_domain }}
+
+  <Directory /var/www/admin>
+    Options FollowSymLinks
+    AllowOverride None
+    Require all granted
+  </Directory>
+
+  # Postfixadmin
+
+  <Directory /var/www/admin/epostadmin>
+    SetEnv DB_USER "postfixadmin"
+    SetEnv DB_PASS "{{ postfix_admin_db_passwd }}"
+    <IfModule mod_proxy_fcgi.c>
+      # Run php-fpm via proxy_fcgi
+      <FilesMatch \.php$>
+        SetHandler "proxy:unix:/run/php/php-fpm.sock|fcgi://localhost"
+      </FilesMatch>
+      # Only allow access to setup.php etc. from localhost
+      <FilesMatch "^(config\.inc|config\.local|setup|xmlrpc)\.php">
+        Require local
+      </FilesMatch>
+    </IfModule>
+  </Directory>
+
+  {% if mailman_install %}
+  # Mailman
+
+  ScriptAlias /mailman/ /usr/lib/cgi-bin/mailman/
+  Alias /archives/ /var/lib/mailman/archives/public/
+  Alias /images/mailman/ /usr/share/images/mailman/
+  RedirectMatch ^/mailman/?$ /mailman/listinfo
+
+  <Directory /usr/lib/cgi-bin/mailman>
+    AllowOverride None
+    Options ExecCGI
+    AddHandler cgi-script .cgi
+    Require all granted
+  </Directory>
+
+  <Directory /var/lib/mailman/archives/public/>
+    AllowOverride None
+    Options FollowSymLinks
+    Require all granted
+  </Directory>
+
+  <Directory /usr/share/images/mailman>
+    AllowOverride None
+    Options None
+    Require all granted
+  </Directory>
+  {% endif %}
+
+</VirtualHost>

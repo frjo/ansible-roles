@@ -1,0 +1,8 @@
+# Rules are evaluated in the order as specified.
+# 1.2.3.4/16    permit/reject/dunno
+
+{% if client_access is defined %}
+{% for client in client_access %}
+{{ client.address }}  {{ client.access }}
+{% endfor %}
+{% endif %}

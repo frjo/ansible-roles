@@ -1,0 +1,12 @@
+# /etc/postfix/recipient_access
+# run "postmap /etc/postfix/recipient_access" after each edit
+# joe@example.com      PERMIT/REJECT
+
+{% if mailman_install and mailman_lists is defined and mailman_commands is defined %}
+# Stop spam via Mailman
+{% for list in mailman_lists %}
+{% for command in mailman_commands %}
+{{ list.name }}-{{ command }}@{{ list.domain }}  permit_mynetworks,REJECT
+{% endfor %}
+{% endfor %}
+{% endif %}

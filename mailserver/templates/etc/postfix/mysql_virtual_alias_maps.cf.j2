@@ -1,0 +1,7 @@
+user = postfix
+password = {{ postfix_db_passwd }}
+hosts = localhost
+dbname = postfix
+table = alias
+select_field = goto
+where_field = address

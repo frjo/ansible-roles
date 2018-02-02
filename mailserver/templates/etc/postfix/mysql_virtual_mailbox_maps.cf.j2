@@ -1,0 +1,7 @@
+user = postfix
+password = {{ postfix_db_passwd }}
+hosts = localhost
+dbname = postfix
+table = mailbox
+select_field = maildir
+where_field = username

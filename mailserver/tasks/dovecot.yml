@@ -1,0 +1,66 @@
+---
+- name: ensure dovecot packages are installed
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+    update_cache: yes
+    cache_valid_time: 600
+  with_items:
+    - dovecot-core
+    - dovecot-imapd
+    - dovecot-pop3d
+    - dovecot-lmtpd
+    - dovecot-mysql
+  tags:
+    - dovecot
+
+- name: create mail spool directory
+  file:
+    path: /var/spool/vmail
+    state: directory
+    owner: vmail
+    group: vmail
+    mode: 0750
+
+- name: configure dovecot
+  template:
+    src: etc/dovecot/{{ item }}.j2
+    dest: /etc/dovecot/{{ item }}
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - local.conf
+  notify:
+    - restart dovecot
+  tags:
+    - dovecot
+
+- name: configure dovecot sql
+  template:
+    src: etc/dovecot/{{ item }}.j2
+    dest: /etc/dovecot/{{ item }}
+    owner: root
+    group: dovecot
+    mode: 0640
+  with_items:
+    - local-sql.conf
+  when: postfix_db_passwd != ""
+  notify:
+    - restart dovecot
+  tags:
+    - dovecot
+
+- name: comment out auth-system.conf.ext
+  replace:
+    dest: /etc/dovecot/conf.d/10-auth.conf
+    regexp: '^!include auth-system.conf.ext$'
+    replace: '#!include auth-system.conf.ext'
+
+- name: ensure all dovecot services are started and enabled
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items:
+    - dovecot

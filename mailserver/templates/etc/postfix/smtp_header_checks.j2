@@ -1,0 +1,8 @@
+# /etc/postfix/smtp_header_checks
+#
+# /^HEADER:.*content_to_act_on/ ACTION [MESSAGE]
+
+/^Received:/                 IGNORE
+/^User-Agent:/               IGNORE
+/^X-Mailer:/                 IGNORE
+/^X-Originating-IP:/         IGNORE
