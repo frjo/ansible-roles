@@ -1,0 +1,87 @@
+---
+- name: ensure mariadb packages are installed
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+    update_cache: yes
+    cache_valid_time: 600
+  register: dbinstall
+  with_items:
+    - mariadb-server
+    - python-mysqldb
+
+- name: update mariadb root passwd
+  mysql_user:
+    name: root
+    host: "{{ item }}"
+    password: "{{ db_root_passwd }}"
+    priv: "*.*:ALL,GRANT"
+    state: present
+  with_items:
+    - 127.0.0.1
+    - ::1
+    - localhost
+  when: db_root_passwd != "" and dbinstall.changed
+
+- name: delete root mariadb wan account
+  mysql_user:
+    name: root
+    host: "{{ item }}"
+    state: absent
+    login_password: "{{ db_root_passwd }}"
+    login_user: root
+  with_items:
+    - "{{ ansible_fqdn }}"
+    - "{{ ansible_nodename }}"
+  when: db_root_passwd != "" and dbinstall.changed
+
+- name: delete anonymous mariadb user
+  mysql_user:
+    name: ""
+    state: absent
+    login_password: "{{ db_root_passwd }}"
+    login_user: root
+  when: db_root_passwd != "" and dbinstall.changed
+
+- name: remove mariadb test database
+  mysql_db:
+    name: test
+    state: absent
+    login_password: "{{ db_root_passwd }}"
+    login_user: root
+  when: db_root_passwd != "" and dbinstall.changed
+
+- name: configure mariadb
+  template:
+    src: etc/mysql/mariadb.conf.d/local.cnf.j2
+    dest: /etc/mysql/mariadb.conf.d/local.cnf
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart mysql
+
+- name: add a root .my.cnf file
+  template:
+    src: root/my.cnf.j2
+    dest: /root/.my.cnf
+    owner: root
+    group: root
+    mode: 0600
+  when: db_root_passwd != ""
+
+- name: configure cron to run mysqloptimize
+  copy:
+    src: etc/cron.monthly/mysqloptimize
+    dest: /etc/cron.monthly/mysqloptimize
+    owner: root
+    group: root
+    mode: 0750
+
+- name: ensure all mariadb services are started and enabled
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items:
+    - mysql

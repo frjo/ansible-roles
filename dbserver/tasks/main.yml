@@ -1,0 +1,5 @@
+---
+- include: mariadb.yml
+  tags:
+    - db
+- include: automysqlbackup.yml

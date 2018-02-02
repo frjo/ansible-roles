@@ -1,0 +1,44 @@
+---
+- name: ensure automysqlbackup packages are installed
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+    update_cache: yes
+    cache_valid_time: 600
+  with_items:
+    - automysqlbackup
+
+- name: create folder for automysqlbackup
+  file:
+    path: /var/backups/automysqlbackup
+    state: directory
+    owner: root
+    group: root
+    mode: 0750
+
+- name: configure automysqlbackup
+  copy:
+    src: etc/default/automysqlbackup
+    dest: /etc/default/automysqlbackup
+    owner: root
+    group: root
+    mode: 0644
+
+- name: create backup user
+  mysql_user:
+    name: backup
+    host: localhost
+    password: "{{ db_backup_passwd }}"
+    state: present
+    priv: "*.*:EVENT, LOCK TABLES,PROCESS,RELOAD,REPLICATION CLIENT,SELECT,SUPER"
+    login_password: "{{ db_root_passwd }}"
+    login_user: root
+
+- name: add a backup.cnf file
+  template:
+    src: etc/mysql/backup.cnf.j2
+    dest: /etc/mysql/backup.cnf
+    owner: root
+    group: root
+    mode: 0600
+  when: db_root_passwd != ""

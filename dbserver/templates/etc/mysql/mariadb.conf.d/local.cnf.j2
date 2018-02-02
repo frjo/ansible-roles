@@ -1,0 +1,36 @@
+[mysqld]
+# Set character set and collation to utf8mb4.
+character_set_server = utf8mb4
+collation_server = utf8mb4_unicode_ci
+
+# Common Configuration
+skip_name_resolve = 1
+connect_timeout = 10
+interactive_timeout = 25
+wait_timeout = 60
+max_allowed_packet = 64M
+table_open_cache = {{ table_open_cache }}
+table_definition_cache =  {{ table_open_cache }}
+thread_handling = pool-of-threads
+max_heap_table_size = {{ tmp_table_size }}
+tmp_table_size = {{ tmp_table_size }}
+#tx_isolation = READ-COMMITTED
+
+# Query Cache Configuration
+query_cache_size = {{ query_cache_size }}
+query_cache_limit = 2M
+query_cache_min_res_unit = 2K
+
+# Slow Log Configuration
+slow_query_log = 1
+slow_query_log_file = /var/log/mysql/mysql_slow_query.log
+long_query_time = 5
+#log_queries_not_using_indexes = 1
+
+# InnoDB Configuration
+innodb_buffer_pool_size = {{ innodb_buffer_pool_size }}
+innodb_flush_method = O_DIRECT
+innodb_file_per_table = 1
+innodb_flush_log_at_trx_commit = 2
+innodb_large_prefix = 1
+innodb_file_format = barracuda

@@ -1,0 +1,3 @@
+#!/bin/sh
+
+/usr/bin/mysqlcheck --defaults-file=/root/.my.cnf --host=localhost --optimize --auto-repair --all-databases

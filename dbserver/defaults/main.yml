@@ -1,0 +1,5 @@
+---
+table_open_cache: 2000
+tmp_table_size: 16M
+innodb_buffer_pool_size: 128M
+query_cache_size: 0

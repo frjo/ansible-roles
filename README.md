@@ -36,6 +36,11 @@ Creates servers for [Mail relay och MX backup](https://xdeb.net/mailrelay) servi
 Read more in my blog post [Mail relay, MX backup and spam filtering with Postfix](https://xdeb.org/post/2017/12/20/mail-relay-mx-backup-and-spam-filtering-with-postfix/).
 
 
+## DB Server (MariaDB)
+
+Database server with local backup. MariaDB is a drop in replacement for MySQL and is run by the people who originally created MySQL, before is was bought by Sun and then swallowed up by Oracle.
+
+
 ## Security camera
 
 Creates a security camera with a Raspberry Pi (Raspian), the Raspberry Pi Camera and [Motion](https://motion-project.github.io). Tested with Raspberry Pi 3 Model B and Zero W with the Raspberry Camera v2.
