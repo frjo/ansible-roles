@@ -33,11 +33,12 @@ Read more in my blog post [Let's Encrypt my servers with acme tiny](https://xdeb
 
 A mail server built with postfix and dovecot. Support multiple domains and virtual mailboxes and aliases in a sql database. Administration via the postfix admin web interface.
 
-
-
 Use together with the common and dbserver roles.
 
 Provides a Apache vhost conf file as well but you need to install Apache separately.
+
+Read more in by blog post [Run your own mail server with Postfix and Dovecot](https://xdeb.org/post/2018/02/07/run-your-own-mail-server-with-postfix-and-dovecot/).
+
 
 ## Mail relay och MX backup
 
