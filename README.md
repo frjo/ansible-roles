@@ -1,3 +1,21 @@
+# Debian 9, Dovecot, Postfix, MariaDB Server with ansible.
+# Prerequisites
+First you need to have Debian 9 box with installed ansible, apache2, php, php-mysql, php-mbstring.
+My version requirest that you already have Lets encrypt certificates generated. They need to be copied to /etc/ssl/letsencrypt/[yourdomain]
+Set hostname in /etc/hosts
+
+# Installation
+## Run playbook:
+```ansible-playbook play.yml --extra-vars "ansible_fqdn=yourdomain postfix_db_passwd=*** db_root_passwd=*** db_backup_passwd=*** postfix_admin_db_passwd=*** acme_certs_dir=/etc/ssl/letsencrypt"```
+ 
+## Change Database collation
+Maria DB has some strange collation. hange collation on postfix database to for example 'latin2_general_ci'
+
+## Set up postfixadmin
+- copy mail.conf from /etc/apache2/sites-available/ to /etc/apache2/sites-enabled/
+- go to https://yourdomain/epostadmin/setup.php
+- set up seuperuser account
+
 # Ansible roles
 
 Here are some Ansible roles I have built for my own use.
