@@ -1,5 +1,6 @@
 ---
 - include: postfix.yml
+- include: misc.yml
 - include: dovecot.yml
   tags:
     - dovecot

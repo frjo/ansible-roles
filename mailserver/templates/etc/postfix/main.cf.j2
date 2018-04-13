@@ -29,9 +29,9 @@ smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 smtp_tls_exclude_ciphers = EXPORT, LOW
 smtpd_tls_auth_only = yes
 smtpd_tls_security_level = may
-smtpd_tls_cert_file={{ acme_certs_dir }}/{{ acme_domains[0] }}/signed.crt
-smtpd_tls_key_file={{ acme_certs_dir }}/domain.key
-smtpd_tls_CAfile={{ acme_certs_dir }}/chain.pem
+smtpd_tls_cert_file={{ acme_certs_dir }}/{{ acme_domains[0] }}/fullchain.pem
+smtpd_tls_key_file={{ acme_certs_dir }}/{{acme_domains[0]}}/privkey.pem
+smtpd_tls_CAfile={{ acme_certs_dir }}/{{acme_domains[0]}}/chain.pem
 smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
 smtpd_tls_exclude_ciphers = EXPORT, LOW
 smtpd_tls_received_header = yes
@@ -96,7 +96,6 @@ smtp_header_checks = pcre:/etc/postfix/smtp_header_checks
 # Requirements for the HELO statement
 smtpd_helo_restrictions =
   permit_mynetworks,
-  reject_non_fqdn_helo_hostname,
   reject_invalid_helo_hostname,
   check_helo_access hash:/etc/postfix/helo_access,
   permit
@@ -125,7 +124,7 @@ smtpd_recipient_restrictions =
   reject_rbl_client {{ zen_rbl }},
   reject_rbl_client b.barracudacentral.org,
   reject_unlisted_recipient,
-  check_policy_service unix:private/policyd-spf,
+#  check_policy_service unix:private/policyd-spf,
   permit
 
 smtpd_relay_restrictions =
