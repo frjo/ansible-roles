@@ -30,7 +30,7 @@
     host: localhost
     password: "{{ db_backup_passwd }}"
     state: present
-    priv: "*.*:EVENT, LOCK TABLES,PROCESS,RELOAD,REPLICATION CLIENT,SELECT,SUPER"
+    priv: "*.*:EVENT,LOCK TABLES,PROCESS,RELOAD,REPLICATION CLIENT,SELECT,SUPER"
     login_password: "{{ db_root_passwd }}"
     login_user: root
 
