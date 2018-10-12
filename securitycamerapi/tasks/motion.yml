@@ -1,26 +1,13 @@
 ---
-- name: ensure motion dependencies packages are installed
+- name: ensure motion packages are installed
   apt:
     pkg: "{{ item }}"
     state: latest
     update_cache: yes
     cache_valid_time: 600
   with_items:
-    - libjpeg-dev
-    - libx264-142
-    - libavcodec56
-    - libavformat56
-    - libmysqlclient18
-    - libswscale3
-    - libpq5
-
-- name: get latest ffmeg deb that have pi camera support
-  apt:
-    deb: https://github.com/ccrisan/motioneye/wiki/precompiled/ffmpeg_3.1.1-1_armhf.deb
-
-- name: get latest motion deb that have pi camera support
-  apt:
-    deb: https://github.com/Motion-Project/motion/releases/download/release-4.0.1/pi_jessie_motion_4.0.1-1_armhf.deb
+    - motion
+    - ffmpeg
 
 - name: create folder for motion created files
   file:
@@ -30,14 +17,17 @@
     group: motion
     mode: 0750
 
-- name: setup pi camera
+- name: load module for pi camera
+  command: modprobe bcm2835-v4l2
+  notify:
+    - restart motion
+
+- name: permanent load module for pi camera
   lineinfile:
     dest: /etc/modules
     line: 'bcm2835-v4l2'
     insertbefore: EOF
     state: present
-  notify:
-    - restart motion
 
 - name: copy mask.pgm file
   copy:
