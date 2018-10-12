@@ -1,0 +1,27 @@
+---
+- name: add repository key for ubiquiti for debian
+  apt_key:
+    url: https://dl.ubnt.com/unifi/unifi-repo.gpg
+    state: present
+
+- name: add ubiquiti repository for debian
+  apt_repository:
+    repo: 'deb http://www.ubnt.com/downloads/unifi/debian stable ubiquiti'
+
+- name: ensure ubiquiti packages are installed
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+    update_cache: yes
+    cache_valid_time: 600
+  with_items:
+    - oracle-java8-jdk
+    - unifi
+
+- name: stop default mongodb
+  command: systemctl stop mongodb
+  changed_when: False
+
+- name: disable default mongodb
+  command: systemctl disable mongodb
+  changed_when: False

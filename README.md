@@ -55,3 +55,10 @@ Database server with local backup. MariaDB is a drop in replacement for MySQL an
 ## Security camera
 
 Creates a security camera with a Raspberry Pi (Raspian), the Raspberry Pi Camera and [Motion](https://motion-project.github.io). Tested with Raspberry Pi 3 Model B and Zero W with the Raspberry Camera v2.
+
+
+## UniFi Controller
+
+Run the UniFi Controller on a Raspberry Pi (Raspian). Tested with Raspberry Pi 3 Model B and since it's a Java application that needs som RAM I would not run in on anything smaller.
+
+Remember to open up tcp ports 8080 and 8443 as well as udp port 3478 to allow the controller to communicate with the access points.
