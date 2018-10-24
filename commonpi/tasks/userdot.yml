@@ -7,3 +7,18 @@
     group: root
     mode: 0644
 
+- name: copy dot files to pi home directory
+  copy:
+    src: files/userdot/
+    dest: /home/pi/
+    owner: pi
+    group: pi
+    mode: 0644
+
+- name: copy dot files to skel directory
+  copy:
+    src: files/userdot/
+    dest: /etc/skel/
+    owner: root
+    group: root
+    mode: 0644

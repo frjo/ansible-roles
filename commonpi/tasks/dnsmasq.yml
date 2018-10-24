@@ -12,7 +12,14 @@
   command: chattr -i /etc/resolv.conf
   changed_when: False
 
-- name: setup resolve.conf
+- name: setup resolve.conf 1
+  lineinfile:
+    dest: /etc/resolv.conf
+    line: "nameserver {{ ansible_default_ipv4.gateway}}"
+    insertbefore: BOF
+    state: present
+
+- name: setup resolve.conf 2
   lineinfile:
     dest: /etc/resolv.conf
     line: "nameserver 127.0.0.1"

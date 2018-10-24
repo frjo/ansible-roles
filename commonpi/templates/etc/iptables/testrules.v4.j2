@@ -45,7 +45,7 @@
 # Allow all outbound
 -A OUTPUT -o {{ ansible_default_ipv4.interface }} -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
 
-# Allow certain inbound ICMP types (ping, traceroute..)
+# Allow certain inbound ICMP types (ping, traceroute)
 -A INPUT -i {{ ansible_default_ipv4.interface }} -p icmp --icmp-type destination-unreachable -m limit --limit 1/second -j ACCEPT
 -A INPUT -i {{ ansible_default_ipv4.interface }} -p icmp --icmp-type echo-reply -m limit --limit 1/second -j ACCEPT
 -A INPUT -i {{ ansible_default_ipv4.interface }} -p icmp --icmp-type echo-request -m limit --limit 1/second -j ACCEPT

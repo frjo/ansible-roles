@@ -7,9 +7,6 @@
 - include: userdot.yml
   tags:
     - user
-- include: ssh.yml
-  tags:
-    - ssh
 - include: mosh.yml
 - include: needrestart.yml
 - include: iptables-persistent.yml
