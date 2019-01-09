@@ -42,7 +42,7 @@ Read more in by blog post [Run your own mail server with Postfix and Dovecot](ht
 
 ## Mail relay och MX backup
 
-Creates servers for [Mail relay och MX backup](https://xdeb.net/mailrelay) service using Debian 9 and Postfix.
+Creates servers for Mail relay och MX backup service using Debian 9 and Postfix.
 
 Read more in my blog post [Mail relay, MX backup and spam filtering with Postfix](https://xdeb.org/post/2017/12/20/mail-relay-mx-backup-and-spam-filtering-with-postfix/).
 
