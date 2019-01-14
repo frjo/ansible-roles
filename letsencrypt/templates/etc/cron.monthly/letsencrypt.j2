@@ -9,7 +9,9 @@ if [ $PORT80 = 0 ]; then
   cd {{ acme_challenge_dir }}
   nohup python -m SimpleHTTPServer 80 > /dev/null 2>&1 &
   iptables -A INPUT -i {{ ansible_default_ipv4.interface }} -p tcp --dport 80 -m conntrack --ctstate NEW -j ACCEPT
+  {% if ansible_default_ipv6.interface is defined %}
   ip6tables -A INPUT -i {{ ansible_default_ipv6.interface }} -p tcp --dport 80 -m conntrack --ctstate NEW -j ACCEPT
+  {% endif %}
 fi
 
 # Get a updated certificate.
@@ -50,6 +52,8 @@ done
 # Stop temp web server and close port 80 if needed.
 if [ $PORT80 = 0 ]; then
   iptables -D INPUT -i {{ ansible_default_ipv4.interface }} -p tcp --dport 80 -m conntrack --ctstate NEW -j ACCEPT
+  {% if ansible_default_ipv6.interface is defined %}
   ip6tables -D INPUT -i {{ ansible_default_ipv6.interface }} -p tcp --dport 80 -m conntrack --ctstate NEW -j ACCEPT
+  {% endif %}
   pkill -f SimpleHTTPServer
 fi
