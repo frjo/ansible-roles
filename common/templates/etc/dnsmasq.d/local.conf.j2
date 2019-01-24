@@ -6,4 +6,7 @@ listen-address={{ ansible_default_ipv4.address }}
 listen-address=::1
 listen-address={{ ansible_default_ipv6.address }}
 {% endif %}
+{% if vpn_network is defined %}
+listen-address={{ vpn_network }}.1
+{% endif %}
 cache-size=2048
