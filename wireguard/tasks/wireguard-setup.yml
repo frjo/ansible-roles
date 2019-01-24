@@ -1,0 +1,78 @@
+---
+- name: ensure all wireguard services are stopped and enabled
+  service:
+    name: "{{ item }}"
+    state: stopped
+    enabled: yes
+  with_items:
+    - wg-quick@wg0
+
+- name: check if wg0-server.conf already exists
+  stat:
+    path: /etc/wireguard/wg0.conf
+  register: wg0_conf
+
+- name: generate directories for client configs
+  file:
+    path: "~/wg/client_{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+  with_sequence: start=1 end={{ clients }}
+  when: wg0_conf is not defined or wg0_conf.stat.exists == false
+
+- name: generate private and public keys for the client and server
+  shell: umask 077; wg genkey | tee ~/wg/{{ item }}.private | wg pubkey > ~/wg/{{ item }}.public
+  register: key_files
+  with_sequence: start=0 end={{ clients }}
+  when: wg0_conf is not defined or wg0_conf.stat.exists == false
+
+- name: register private key file contents
+  shell: cat ~/wg/{{ item }}.private
+  register: private_key_files
+  with_sequence: start=0 end={{ clients }}
+
+- name: register public key file contents
+  shell: cat ~/wg/{{ item }}.public
+  register: public_key_files
+  with_sequence: start=0 end={{ clients }}
+
+- name: generate client configs
+  template:
+    src: "root/wg/client.conf.j2"
+    dest: "~/wg/client_{{ item }}/wg0-client.conf"
+    owner: root
+    group: root
+    mode: 0600
+  with_sequence: start=1 end={{ clients }}
+  when: wg0_conf is not defined or wg0_conf.stat.exists == false
+
+- name: generate qr codes for client configs
+  shell: umask 077; qrencode --type=PNG --output=/root/wg/client_{{ item }}/wg0-client.png < ~/wg/client_{{ item }}/wg0-client.conf
+  with_sequence: start=1 end={{ clients }}
+  when: wg0_conf is not defined or wg0_conf.stat.exists == false
+
+- name: generate server config
+  template:
+    src: "etc/wireguard/wg0.conf.j2"
+    dest: "/etc/wireguard/wg0.conf"
+    owner: root
+    group: root
+    mode: 0600
+
+- name: enable ipv4 traffic forwarding
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+- name: ensure all wireguard services are started
+  service:
+    name: "{{ item }}"
+    state: started
+  with_items:
+    - wg-quick@wg0
+

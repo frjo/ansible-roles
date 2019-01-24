@@ -1,0 +1,10 @@
+---
+- include: wireguard-install.yml
+  tags:
+    - wginstall
+- include: wireguard-setup.yml
+  tags:
+    - wgsetup
+- include: wireguard-fetch-profiles.yml
+  tags:
+    - wgfetch

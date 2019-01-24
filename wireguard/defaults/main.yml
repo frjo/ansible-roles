@@ -1,0 +1,4 @@
+---
+vpn_network: '10.100.100'
+vpn_port: '58172'
+clients: 10

@@ -62,3 +62,8 @@ Creates a security camera with a Raspberry Pi (Raspian), the Raspberry Pi Camera
 Run the UniFi Controller on a Raspberry Pi (Raspian). Tested with Raspberry Pi 3 Model B and since it's a Java application that needs some RAM I would not run in on anything smaller.
 
 Remember to open up tcp ports 8080 and 8443 as well as udp port 3478 to allow the controller to communicate with the access points.
+
+## Wireguard (VPN)
+
+Install and setup a Wireguard VPN server with a number of client accounts (10 by default). The account information, including a handy QR code in PNG format, is downloaded at the end.
+
