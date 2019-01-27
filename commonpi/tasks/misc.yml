@@ -1,0 +1,10 @@
+---
+- name: check if letsencrypt certs are in place
+  stat:
+    path: "{{ acme_certs_dir }}"
+  register: acme_certs_dir_check
+  tags:
+    - always
+
+- name: set timezone to UTC
+  command: timedatectl set-timezone UTC

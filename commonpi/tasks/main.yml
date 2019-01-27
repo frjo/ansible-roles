@@ -1,5 +1,6 @@
 ---
 - include: busybox.yml
+- include: curl.yml
 - include: debsums.yml
 - include: disable-swap.yml
   tags:
@@ -15,4 +16,7 @@
 - include: dnsmasq.yml
   tags:
     - dns
+- include: ntp.yml
+- include: sqlite.yml
 - include: vim-nox.yml
+- include: misc.yml
