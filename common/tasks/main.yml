@@ -1,8 +1,8 @@
 ---
-- include: apt.yml
-  tags:
-    - apt
 - include: apticron.yml
+  tags:
+    - apticron
+- include: curl.yml
 - include: debsums.yml
 - include: disk-check.yml
   tags:
@@ -18,6 +18,7 @@
 - include: dnsmasq.yml
   tags:
     - dns
-#- include: ntp.yml
+- include: ntp.yml
+- include: sqlite.yml
 - include: vim-nox.yml
 - include: misc.yml

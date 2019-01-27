@@ -1,5 +1,0 @@
-deb http://ftp.debian.org/debian/ wheezy main non-free
-deb-src http://ftp.debian.org/debian/ wheezy main non-free
-deb http://security.debian.org/ wheezy/updates main non-free
-deb-src http://security.debian.org/ wheezy/updates main non-free
-deb http://ftp.debian.org/debian/ wheezy-backports main

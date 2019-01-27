@@ -7,6 +7,7 @@
     cache_valid_time: 600
   with_items:
     - ntp
+  when: need_ntp == true
 
 - name: configure ntp
   template:
@@ -17,7 +18,7 @@
     mode: 0644
   notify:
     - restart ntp
-  when: ntpserver is defined
+  when: ntpserver is defined and need_ntp == true
 
 - name: ensure all ntp services are started and enabled
   service:

@@ -1,5 +1,6 @@
 ---
 acme_certs_dir: /etc/ssl/letsencrypt
+need_ntp: true
 sshport: 22
 openports_list:
   - 22

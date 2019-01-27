@@ -7,3 +7,11 @@
     cache_valid_time: 600
   with_items:
     - apticron
+
+- name: configure apticron
+  template:
+    src: etc/apticron/apticron.conf.j2
+    dest: /etc/apticron/apticron.conf
+    owner: root
+    group: root
+    mode: 0644

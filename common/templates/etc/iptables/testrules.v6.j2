@@ -35,7 +35,7 @@
 -A INPUT -d ff00::/8 -j ACCEPT
 -A OUTPUT -d ff00::/8 -j ACCEPT
 
-# Allow certain inbound ICMP types (ping, traceroute..)
+# Allow certain inbound ICMP types (ping, traceroute)
 -A INPUT -i {{ ansible_default_ipv6.interface }} -p icmpv6 --icmpv6-type destination-unreachable -m limit --limit 1/second -j ACCEPT
 -A INPUT -i {{ ansible_default_ipv6.interface }} -p icmpv6 --icmpv6-type echo-reply -m limit --limit 1/second -j ACCEPT
 -A INPUT -i {{ ansible_default_ipv6.interface }} -p icmpv6 --icmpv6-type echo-request -m limit --limit 1/second -j ACCEPT

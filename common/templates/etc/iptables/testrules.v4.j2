@@ -39,21 +39,19 @@
 -A INPUT -m addrtype --dst-type ANYCAST -j DROP
 -A INPUT -d 224.0.0.0/4 -j DROP
 
-
 # Allow only ESTABLISHED and RELATED incomming
 -A INPUT -i {{ ansible_default_ipv4.interface }} -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
 # Allow all outbound
 -A OUTPUT -o {{ ansible_default_ipv4.interface }} -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
 
-# Allow certain inbound ICMP types (ping, traceroute..)
+# Allow certain inbound ICMP types (ping, traceroute)
 -A INPUT -i {{ ansible_default_ipv4.interface }} -p icmp --icmp-type destination-unreachable -m limit --limit 1/second -j ACCEPT
 -A INPUT -i {{ ansible_default_ipv4.interface }} -p icmp --icmp-type echo-reply -m limit --limit 1/second -j ACCEPT
 -A INPUT -i {{ ansible_default_ipv4.interface }} -p icmp --icmp-type echo-request -m limit --limit 1/second -j ACCEPT
 -A INPUT -i {{ ansible_default_ipv4.interface }} -p icmp --icmp-type fragmentation-needed -m limit --limit 1/second -j ACCEPT
 -A INPUT -i {{ ansible_default_ipv4.interface }} -p icmp --icmp-type source-quench -m limit --limit 1/second -j ACCEPT
 -A INPUT -i {{ ansible_default_ipv4.interface }} -p icmp --icmp-type time-exceeded -m limit --limit 1/second -j ACCEPT
-
 
 # Allow needed services from anywhere
 -A INPUT -i {{ ansible_default_ipv4.interface }} -p tcp -m multiport --dport {{ openports_list|join(',') }} -m conntrack --ctstate NEW -j ACCEPT
