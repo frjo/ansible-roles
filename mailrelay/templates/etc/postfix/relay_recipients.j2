@@ -3,7 +3,9 @@
 # info@example.com    OK
 
 {% for recipient in recipient_list %}
+{% if recipient != "@example.com" %}
 {{ recipient }}    OK
+{% endif %}
 {% endfor %}
 
 {% for transport in transport_list %}

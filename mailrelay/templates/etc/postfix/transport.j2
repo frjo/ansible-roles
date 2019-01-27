@@ -1,6 +1,6 @@
 # /etc/postfix/transport
 # run  "postmap  /etc/postfix/transport"  after each edit
-# example.com    PERMIT/REJECT
+# example.com    smtp:mail.example.com:25
 
 {% for transport in transport_list %}
 {{ transport.domain }}  smtp:{{ transport.server }}:{{ transport.port }}
