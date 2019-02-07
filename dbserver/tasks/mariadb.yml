@@ -1,14 +1,15 @@
 ---
 - name: ensure mariadb packages are installed
   apt:
-    pkg: "{{ item }}"
+    pkg: "{{ packages }}"
     state: latest
     update_cache: yes
     cache_valid_time: 600
   register: dbinstall
-  with_items:
-    - mariadb-server
-    - python-mysqldb
+  vars:
+    packages:
+      - mariadb-server
+      - python-mysqldb
 
 - name: update mariadb root passwd
   mysql_user:

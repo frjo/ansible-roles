@@ -1,13 +1,14 @@
 ---
 - name: ensure needed packages are installed
   apt:
-    pkg: "{{ item }}"
+    pkg: "{{ packages }}"
     state: latest
     update_cache: yes
     cache_valid_time: 600
-  with_items:
-    - sudo
-    - lsof
+  vars:
+    packages:
+      - sudo
+      - lsof
 
 - name: set up acme group
   group:

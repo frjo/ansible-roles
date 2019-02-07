@@ -1,9 +1,10 @@
 ---
 - name: ensure needrestart packages are installed
   apt:
-    pkg: "{{ item }}"
+    pkg: "{{ packages }}"
     state: latest
     update_cache: yes
     cache_valid_time: 600
-  with_items:
-    - needrestart
+  vars:
+    packages:
+      - needrestart

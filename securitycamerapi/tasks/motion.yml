@@ -1,13 +1,14 @@
 ---
 - name: ensure motion packages are installed
   apt:
-    pkg: "{{ item }}"
+    pkg: "{{ packages }}"
     state: latest
     update_cache: yes
     cache_valid_time: 600
-  with_items:
-    - motion
-    - ffmpeg
+  vars:
+    packages:
+      - motion
+      - ffmpeg
 
 - name: create folder for motion created files
   file:

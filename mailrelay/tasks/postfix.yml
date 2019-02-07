@@ -1,16 +1,17 @@
 ---
 - name: ensure postfix packages are installed
   apt:
-    pkg: "{{ item }}"
+    pkg: "{{ packages }}"
     state: latest
     update_cache: yes
     cache_valid_time: 600
   register: postfixinstall
-  with_items:
-    - postfix
-    - postfix-pcre
-    - postfix-policyd-spf-python
-    - pflogsumm
+  vars:
+    packages:
+      - postfix
+      - postfix-pcre
+      - postfix-policyd-spf-python
+      - pflogsumm
 
 - name: configure mailname
   template:

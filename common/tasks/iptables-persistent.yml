@@ -1,12 +1,13 @@
 ---
 - name: ensure iptables packages are installed
   apt:
-    pkg: "{{ item }}"
+    pkg: "{{ packages }}"
     state: latest
     update_cache: yes
     cache_valid_time: 600
-  with_items:
-    - iptables-persistent
+  vars:
+    packages:
+      - iptables-persistent
   register: iptablesinstall
   when: ansible_product_name != "VirtualBox"
 
