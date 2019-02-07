@@ -16,7 +16,7 @@
     cache_valid_time: 600
   vars:
     packages:
-      - oracle-java8-jdk
+      - openjdk-8-jre-headless
       - unifi
 
 - name: stop default mongodb
