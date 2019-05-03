@@ -19,24 +19,24 @@
     owner: root
     group: root
     mode: 0700
-  with_sequence: start=1 end={{ clients }}
+  with_sequence: start=1 end={{ vpn_clients }}
   when: wg0_conf is not defined or wg0_conf.stat.exists == false
 
 - name: generate private and public keys for the client and server
   shell: umask 077; wg genkey | tee ~/wg/{{ item }}.private | wg pubkey > ~/wg/{{ item }}.public
   register: key_files
-  with_sequence: start=0 end={{ clients }}
+  with_sequence: start=0 end={{ vpn_clients }}
   when: wg0_conf is not defined or wg0_conf.stat.exists == false
 
 - name: register private key file contents
   shell: cat ~/wg/{{ item }}.private
   register: private_key_files
-  with_sequence: start=0 end={{ clients }}
+  with_sequence: start=0 end={{ vpn_clients }}
 
 - name: register public key file contents
   shell: cat ~/wg/{{ item }}.public
   register: public_key_files
-  with_sequence: start=0 end={{ clients }}
+  with_sequence: start=0 end={{ vpn_clients }}
 
 - name: generate client configs
   template:
@@ -45,12 +45,12 @@
     owner: root
     group: root
     mode: 0600
-  with_sequence: start=1 end={{ clients }}
+  with_sequence: start=1 end={{ vpn_clients }}
   when: wg0_conf is not defined or wg0_conf.stat.exists == false
 
 - name: generate qr codes for client configs
   shell: umask 077; qrencode --type=PNG --output=/root/wg/client_{{ item }}/wg0-client.png < ~/wg/client_{{ item }}/wg0-client.conf
-  with_sequence: start=1 end={{ clients }}
+  with_sequence: start=1 end={{ vpn_clients }}
   when: wg0_conf is not defined or wg0_conf.stat.exists == false
 
 - name: generate server config

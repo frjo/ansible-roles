@@ -7,4 +7,4 @@ PrivateKey = {{ private_key_files.results[item|int].stdout }}
 PublicKey = {{ public_key_files.results[0].stdout }}
 AllowedIPs = 0.0.0.0/0
 Endpoint = {{ ansible_default_ipv4.address }}:{{ vpn_port }}
-PersistentKeepalive = 25
+PersistentKeepalive = {{ vpn_persistent_keepalive }}

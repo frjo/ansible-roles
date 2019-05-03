@@ -65,7 +65,7 @@ Remember to open up tcp ports 8080 and 8443 as well as udp port 3478 to allow th
 
 ## Wireguard (VPN)
 
-Install and setup a Wireguard VPN server with a number of client accounts (10 by default). The account information, including a handy QR code in PNG format, is downloaded at the end.
+Install and setup a Wireguard VPN server with a number of client accounts (20 by default). The account information, including a handy QR code in PNG format, is downloaded at the end.
 
 Read more in my blog post [Using Ansible to setup a WireGuard VPN server on Debian 9](https://xdeb.org/post/2019/01/24/using-ansible-to-setup-a-wireguard-vpn-server-on-debian-9/).
 

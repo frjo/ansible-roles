@@ -4,11 +4,11 @@
     src: "~/wg/client_{{item}}/wg0-client.conf"
     dest: "wireguard_profiles/client_{{item}}/"
     flat: yes
-  with_sequence: start=1 end={{ clients }}
+  with_sequence: start=1 end={{ vpn_clients }}
 
 - name:  download client qr codes to the "wireguard_profiles/" folder on your local host
   fetch:
     src: "~/wg/client_{{item}}/wg0-client.png"
     dest: "wireguard_profiles/client_{{item}}/"
     flat: yes
-  with_sequence: start=1 end={{ clients }}
+  with_sequence: start=1 end={{ vpn_clients }}
