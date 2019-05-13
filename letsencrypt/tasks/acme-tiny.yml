@@ -67,15 +67,15 @@
 
 - name: move intermediate cert when valid
   shell: mv -f {{ acme_certs_dir }}/chain_new.pem {{ acme_certs_dir }}/chain.pem
-  when: certificatevalid|succeeded
+  when: certificatevalid is succeeded
 
 - name: move signed certificate when valid
   shell: mv -f {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed.crt
-  when: certificatevalid|succeeded
+  when: certificatevalid is succeeded
 
 - name: create fullchain.pem from signed.crt and chain.pem
   shell: cat {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed.crt {{ acme_certs_dir }}/chain.pem > {{ acme_certs_dir }}/{{ acme_domains[0] }}/fullchain.pem
-  when: certificatevalid|succeeded
+  when: certificatevalid is succeeded
 
 - name: set permissions on domain.csr
   file:
@@ -91,10 +91,10 @@
   file:
     path: "{{ acme_certs_dir }}/chain_new.pem"
     state: absent
-  when: certificatevalid|failed
+  when: certificatevalid is failed
 
 - name: remove signed certificate if not valid
   file:
     path: "{{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt"
     state: absent
-  when: certificatevalid|failed
+  when: certificatevalid is failed
