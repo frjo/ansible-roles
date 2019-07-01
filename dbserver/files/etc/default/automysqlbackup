@@ -44,8 +44,7 @@ MAILCONTENT="quiet"
 MAXATTSIZE="4000"
 
 # Email Address to send mail to? (user@domain.com)
-#MAILADDR="root"
-MAILADDR="webmaster@combonet.se"
+MAILADDR="root"
 
 # ============================================================
 # === ADVANCED OPTIONS ( Read the doc's below for details )===
