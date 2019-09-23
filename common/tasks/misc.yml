@@ -8,3 +8,4 @@
 
 - name: set timezone to UTC
   command: timedatectl set-timezone UTC
+  changed_when: False

@@ -4,9 +4,9 @@
     name: dnsmasq
     state: restarted
 
-- name: restart netfilter-persistent
+- name: restart nftables
   service:
-    name: netfilter-persistent
+    name: nftables
     state: restarted
 
 - name: restart ntp

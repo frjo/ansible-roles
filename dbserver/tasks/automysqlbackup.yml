@@ -18,8 +18,8 @@
     mode: 0750
 
 - name: configure automysqlbackup
-  copy:
-    src: etc/default/automysqlbackup
+  template:
+    src: etc/default/automysqlbackup.j2
     dest: /etc/default/automysqlbackup
     owner: root
     group: root

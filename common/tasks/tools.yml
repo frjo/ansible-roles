@@ -1,0 +1,19 @@
+---
+- name: ensure all tools packages are installed
+  apt:
+    pkg: "{{ packages }}"
+    state: latest
+    update_cache: yes
+    cache_valid_time: 600
+  vars:
+    packages:
+      - curl
+      - debsums
+      - iperf3
+      - mosh
+      - net-tools
+      - needrestart
+      - sqlite3
+      - sudo
+      - tmux
+      - vim-nox

@@ -3,8 +3,6 @@ Address = {{ vpn_network }}.1/24
 SaveConfig = true
 ListenPort = {{ vpn_port }}
 PrivateKey = {{ private_key_files.results[0].stdout }}
-PostUp = iptables -A INPUT -i %i -p udp --dport 53 -m conntrack --ctstate NEW -j ACCEPT; iptables -A OUTPUT -o %i -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT; iptables -A FORWARD -i %i -o {{ ansible_default_ipv4.interface }} -j ACCEPT; iptables -A FORWARD -i {{ ansible_default_ipv4.interface }} -o %i -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT; iptables -t nat -A POSTROUTING -o {{ ansible_default_ipv4.interface }} -s {{ vpn_network }}.0/24 -j MASQUERADE
-PostDown = iptables -D INPUT -i %i -p udp --dport 53 -m conntrack --ctstate NEW -j ACCEPT; iptables -D OUTPUT -o %i -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT; iptables -D FORWARD -i %i -o {{ ansible_default_ipv4.interface }} -j ACCEPT; iptables -D FORWARD -i {{ ansible_default_ipv4.interface }} -o %i -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT; iptables -t nat -D POSTROUTING -o {{ ansible_default_ipv4.interface }} -s {{ vpn_network }}.0/24 -j MASQUERADE
 
 {% for i in range(vpn_clients) %}
 [Peer]

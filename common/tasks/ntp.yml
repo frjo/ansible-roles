@@ -28,4 +28,4 @@
     enabled: yes
   with_items:
     - ntp
-
+  when: need_ntp == true

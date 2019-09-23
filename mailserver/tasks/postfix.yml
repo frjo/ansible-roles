@@ -5,7 +5,6 @@
     state: latest
     update_cache: yes
     cache_valid_time: 600
-  register: postfixinstall
   vars:
     packages:
       - postfix
@@ -109,12 +108,13 @@
     - postfix
 
 - name: generate dh* param keys.
-  shell: openssl dhparam -out dh{{ item }}.tmp {{ item }} && mv dh{{ item }}.tmp /etc/postfix/dh{{ item }}.pem
+  openssl_dhparam:
+    path: /etc/postfix/dh{{ item }}.pem
+    size: "{{ item }}"
   with_items:
     - 512
     - 1024
     - 2048
-  when: postfixinstall.changed
   notify:
     - restart postfix
 

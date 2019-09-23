@@ -12,7 +12,6 @@
     SSLEngine on
     SSLCertificateFile {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed.crt
     SSLCertificateKeyFile {{ acme_certs_dir }}/domain.key
-    SSLCertificateChainFile {{ acme_certs_dir }}/chain.pem
     <IfModule mod_headers.c>
       Header always set Strict-Transport-Security: "max-age=15768000"
     </IfModule>

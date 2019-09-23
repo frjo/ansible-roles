@@ -17,7 +17,7 @@ ssl = required
 ssl_protocols = !SSLv3
 
 {% if acme_certs_dir_check.stat.isdir is defined %}
-ssl_cert = <{{ acme_certs_dir }}/{{ acme_domains[0] }}/fullchain.pem
+ssl_cert = <{{ acme_certs_dir }}/{{ acme_domains[0] }}/signed.crt
 ssl_key = <{{ acme_certs_dir }}/domain.key
 {% endif %}
 

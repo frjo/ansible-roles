@@ -6,7 +6,6 @@
     owner: root
     group: root
     mode: 0644
-  ignore_errors: yes
 
 - name: copy dot files to skel directory
   copy:
@@ -15,7 +14,6 @@
     owner: root
     group: root
     mode: 0644
-  ignore_errors: yes
 
 - name: copy dot files to vagrant home directory
   copy:
@@ -25,4 +23,3 @@
     group: vagrant
     mode: 0644
   when: ansible_product_name == "VirtualBox"
-  ignore_errors: yes

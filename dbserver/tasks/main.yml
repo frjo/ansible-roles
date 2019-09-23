@@ -3,3 +3,5 @@
   tags:
     - db
 - include: automysqlbackup.yml
+  tags:
+    - dbbackup

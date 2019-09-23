@@ -1,0 +1,16 @@
+{% if glesys_vps %}
+deb http://mirrors.glesys.net/debian buster main non-free
+deb-src http://mirrors.glesys.net/debian buster main non-free
+
+deb http://mirrors.glesys.net/debian-security buster-updates main non-free
+deb-src http://mirrors.glesys.net/debian-security buster-updates main non-free
+{% else %}
+deb http://ftp.se.debian.org/debian/ buster main non-free
+deb-src http://ftp.se.debian.org/debian/ buster main non-free
+
+deb http://ftp.se.debian.org/debian/ buster-updates main non-free
+deb-src http://ftp.se.debian.org/debian/ buster-updates main non-free
+{% endif %}
+
+deb http://security.debian.org/debian-security buster/updates main non-free
+deb-src http://security.debian.org/debian-security buster/updates main non-free

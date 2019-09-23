@@ -1,0 +1,101 @@
+#!/usr/sbin/nft -f
+
+flush ruleset
+
+define wan = {{ network_interface | default(ansible_default_ipv4.interface) }}
+
+table inet firewall {
+  set tcp_accepted {
+    type inet_service; flags interval;
+    elements = {
+      {{ openports_list|join(',') }}
+    }
+  }
+  set udp_accepted {
+    type inet_service; flags interval;
+    elements = {
+      {{ openports_udp_list|join(',') }}
+    }
+  }
+  set blacklist_v4 {
+    type ipv4_addr; flags interval;
+    elements = {
+      {{ blacklist_ip_list|join(',') }}
+    }
+  }
+
+  chain incoming {
+    type filter hook input priority 0; policy drop;
+
+    # Limit ping requests.
+    ip protocol icmp icmp type echo-request limit rate over 1/second burst 5 packets drop
+    ip6 nexthdr icmpv6 icmpv6 type echo-request limit rate over 1/second burst 5 packets drop
+
+    # Rules with "limit" need to be put before rules accepting "established" connections.
+    ct state established,related accept
+    ct state invalid drop
+
+    # Allow loopback.
+    iif lo accept
+
+    # Blacklist bad addresses.
+    ip saddr @blacklist_v4 counter drop
+
+    # Drop all fragments
+    ip frag-off & 0x1fff != 0 counter drop
+
+    # Force SYN checks
+    tcp flags & (fin|syn|rst|ack) != syn ct state new counter drop
+
+    # Drop XMAS packets
+    tcp flags & (fin|syn|rst|psh|ack|urg) == fin|syn|rst|psh|ack|urg counter drop
+
+    # Drop NULL packets
+    tcp flags & (fin|syn|rst|psh|ack|urg) == 0x0 counter drop
+
+    # Allow certain inbound ICMP types (ping, traceroute).
+    ip protocol icmp icmp type { destination-unreachable, echo-reply, echo-request, source-quench, time-exceeded } accept
+    ip6 nexthdr icmpv6 icmpv6 type { destination-unreachable, echo-reply, echo-request, nd-neighbor-solicit,  nd-router-advert, nd-neighbor-advert, packet-too-big, parameter-problem, time-exceeded } accept
+
+    # Allow needed ports.
+    iifname $wan tcp dport @tcp_accepted ct state new accept
+    iifname $wan udp dport @udp_accepted ct state new accept
+
+{% if vpn_interface is defined %}
+    iifname {{ vpn_interface }} udp dport 53 ct state new accept
+    iifname {{ vpn_interface }} tcp dport @tcp_accepted ct state new accept
+    iifname {{ vpn_interface }} udp dport @udp_accepted ct state new accept
+{% endif %}
+  }
+
+  chain forwarding {
+    type filter hook forward priority 0; policy drop;
+
+    ct state established,related accept
+    ct state invalid drop
+
+{% if vpn_interface is defined %}
+    iifname {{ vpn_interface }} oifname $wan ct state new accept
+{% endif %}
+  }
+
+  chain outgoing {
+    type filter hook output priority 0; policy drop;
+
+    ct state new,established,related accept
+    ct state invalid drop
+  }
+}
+
+{% if vpn_interface is defined and vpn_network is defined %}
+table ip router {
+    chain prerouting {
+        type nat hook prerouting priority 0;
+    }
+    chain postrouting {
+        type nat hook postrouting priority 100;
+
+        oifname $wan ip saddr {{ vpn_network }}.0/24 masquerade
+    }
+}
+{% endif %}

@@ -2,8 +2,8 @@
 
 Here are some Ansible roles I have built for my own use.
 
-- Requires Ansible 2.x
-- Expects Debian 9 hosts
+- Requires Ansible 2.8.x
+- Expects Debian 10 hosts (the Pi roles not updated yet, see notice.)
 
 
 ## Common
@@ -14,6 +14,8 @@ Wrote a bit about it in [My first 2 minutes on a server - letting Ansible do the
 
 
 ## Common Pi
+
+Notice: Still only tested for Drupal 9 hosts
 
 Common configurations for Raspberry Pi (Raspian) including things like firewall, dns and ntp. I add this role to all my Raspberry Pi playbooks, hence the name.
 
@@ -53,6 +55,8 @@ Database server with local backup. MariaDB is a drop in replacement for MySQL an
 
 
 ## Security camera
+
+Notice: Still only tested for Drupal 9 hosts
 
 Creates a security camera with a Raspberry Pi (Raspian), the Raspberry Pi Camera and [Motion](https://motion-project.github.io). Tested with Raspberry Pi 3 Model B and Zero W with the Raspberry Camera v2.
 
