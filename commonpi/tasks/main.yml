@@ -1,22 +1,18 @@
 ---
 - include: busybox.yml
-- include: curl.yml
-- include: debsums.yml
 - include: disable-swap.yml
   tags:
     - swap
 - include: userdot.yml
   tags:
     - user
-- include: mosh.yml
-- include: needrestart.yml
-- include: iptables-persistent.yml
+- include: nftables.yml
   tags:
     - firewall
 - include: dnsmasq.yml
+  when: need_dns == true
   tags:
     - dns
 - include: ntp.yml
-- include: sqlite.yml
-- include: vim-nox.yml
+- include: tools.yml
 - include: misc.yml

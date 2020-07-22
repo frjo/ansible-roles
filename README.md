@@ -3,7 +3,7 @@
 Here are some Ansible roles I have built for my own use.
 
 - Requires Ansible 2.8.x
-- Expects Debian 10 hosts (the Pi roles not updated yet, see notice.)
+- Expects Debian 10 Buster hosts
 
 
 ## Common
@@ -14,8 +14,6 @@ Wrote a bit about it in [My first 2 minutes on a server - letting Ansible do the
 
 
 ## Common Pi
-
-Notice: Still only tested for Drupal 9 hosts
 
 Common configurations for Raspberry Pi (Raspian) including things like firewall, dns and ntp. I add this role to all my Raspberry Pi playbooks, hence the name.
 
@@ -63,9 +61,9 @@ Creates a security camera with a Raspberry Pi (Raspian), the Raspberry Pi Camera
 
 ## UniFi Controller
 
-Run the UniFi Controller on a Raspberry Pi (Raspian). Tested with Raspberry Pi 3 Model B and since it's a Java application that needs some RAM I would not run in on anything smaller.
+Run the UniFi Controller on a Raspberry Pi (Raspian). Tested with Raspberry Pi 3 and 4 Model B. Since it's a Java application that needs some RAM I would not run in on anything smaller.
 
-Remember to open up tcp ports 8080 and 8443 as well as udp port 3478 to allow the controller to communicate with the access points.
+Remember to open up tcp ports 6789, 8080 and 8443 as well as udp port 3478 to allow the controller to communicate with the access points.
 
 ## Wireguard (VPN)
 

@@ -1,0 +1,29 @@
+---
+- name: ensure nftables packages are installed
+  apt:
+    pkg: "{{ packages }}"
+    state: latest
+    update_cache: yes
+    cache_valid_time: 600
+  vars:
+    packages:
+      - nftables
+
+- name: configure nftables
+  template:
+    src: etc/nftables.conf.j2
+    dest: /etc/nftables.conf
+    owner: root
+    group: root
+    mode: 0644
+  when: network_interface is defined or ansible_default_ipv4.interface is defined
+  notify:
+    - restart nftables
+
+- name: ensure all nftables services are started and enabled
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items:
+    - nftables

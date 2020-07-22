@@ -9,21 +9,6 @@
     packages:
       - dnsmasq
 
-- name: unlock resolve.conf
-  command: chattr -i /etc/resolv.conf
-  changed_when: False
-
-- name: setup resolve.conf
-  lineinfile:
-    dest: /etc/resolv.conf
-    line: "nameserver 127.0.0.1"
-    insertbefore: BOF
-    state: present
-
-- name: lock resolve.conf
-  command: chattr +i /etc/resolv.conf
-  changed_when: False
-
 - name: configure dnsmasq
   template:
     src: etc/dnsmasq.d/local.conf.j2

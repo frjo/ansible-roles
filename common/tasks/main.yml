@@ -1,7 +1,4 @@
 ---
-- include: apt.yml
-  tags:
-    - apt
 - include: apticron.yml
   tags:
     - apticron
@@ -15,6 +12,7 @@
   tags:
     - firewall
 - include: dnsmasq.yml
+  when: need_dns == true
   tags:
     - dns
 - include: ntp.yml

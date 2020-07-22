@@ -3,7 +3,7 @@
 FILE=$1
 
 curl --silent \
-  --form-string "token={{ pushover_token }}" \
+  --form-string "token={{ pushover_pihub_token }}" \
   --form-string "user={{ pushover_user }}" \
   --form-string "title={{ pushover_title }}" \
   --form-string "message={{ pushover_message }}" \

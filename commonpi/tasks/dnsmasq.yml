@@ -9,28 +9,6 @@
     packages:
       - dnsmasq
 
-- name: unlock resolve.conf
-  command: chattr -i /etc/resolv.conf
-  changed_when: False
-
-- name: setup resolve.conf 1
-  lineinfile:
-    dest: /etc/resolv.conf
-    line: "nameserver {{ ansible_default_ipv4.gateway}}"
-    insertbefore: BOF
-    state: present
-
-- name: setup resolve.conf 2
-  lineinfile:
-    dest: /etc/resolv.conf
-    line: "nameserver 127.0.0.1"
-    insertbefore: BOF
-    state: present
-
-- name: lock resolve.conf
-  command: chattr +i /etc/resolv.conf
-  changed_when: False
-
 - name: configure dnsmasq
   template:
     src: etc/dnsmasq.d/local.conf.j2
@@ -48,4 +26,3 @@
     enabled: yes
   with_items:
     - dnsmasq
-
