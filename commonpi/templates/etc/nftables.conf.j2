@@ -17,10 +17,10 @@ table inet firewall {
       {{ openports_udp_list|join(',') }}
     }
   }
-  set blacklist_v4 {
+  set blocklist_v4 {
     type ipv4_addr; flags interval;
     elements = {
-      {{ blacklist_ip_list|join(',') }}
+      {{ blocklist_ip_list|join(',') }}
     }
   }
 
@@ -38,8 +38,8 @@ table inet firewall {
     # Allow loopback.
     iif lo accept
 
-    # Blacklist bad addresses.
-    ip saddr @blacklist_v4 counter drop
+    # Block bad addresses.
+    ip saddr @blocklist_v4 counter drop
 
     # Drop all fragments.
     ip frag-off & 0x1fff != 0 counter drop
