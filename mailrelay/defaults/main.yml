@@ -10,4 +10,4 @@ transport_list:
 recipient_list:
   - "@example.com"
 zen_rbl: zen.spamhaus.org
-#spf_whitelist:
+#spf_allowlist:
