@@ -7,71 +7,36 @@
     cache_valid_time: 600
   vars:
     packages:
-      - php-imap
-  tags:
-    - postfixadmin
+      - postfixadmin
 
-- name: create folder for admin www
-  file:
-    path: /var/www/admin
-    state: directory
-    owner: root
-    group: root
-    mode: 0755
-  tags:
-    - postfixadmin
-
-- name: check if postfixadmin has been downloaded
-  stat:
-    path: /usr/local/share/{{ postfixadminversion }}
-  register: postfixadmin
-  tags:
-    - postfixadmin
-
-- name: download and unpack postfixadmin
-  unarchive:
-    src: https://downloads.sourceforge.net/project/postfixadmin/postfixadmin/{{ postfixadminversion }}/{{ postfixadminversion }}.tar.gz
-    dest: /usr/local/share
-    copy: no
-    owner: root
-    group: www-data
-    mode: "g-w,o-rwx"
-    creates: /usr/local/share/{{ postfixadminversion }}
-  when: postfixadmin.stat.isdir is not defined
-  register: postfixadmininstall
-  tags:
-    - postfixadmin
-
-- name: make templates_c writeble by web server
-  file:
-    path: /usr/local/share/{{ postfixadminversion }}/templates_c
-    state: directory
-    owner: root
-    group: www-data
-    mode: 0770
-  tags:
-    - postfixadmin
-
-- name: make symlink for postfixadmin
-  file:
-    src: /usr/local/share/{{ postfixadminversion }}
-    dest: /var/www/admin/epostadmin
-    state: link
-    owner: root
-    group: www-data
-  tags:
-    - postfixadmin
+- name: disable default apache postfixadmin conf
+  command: a2disconf postfixadmin
+  notify:
+    - reload apache2
 
 - name: configure postfixadmin
   template:
     src: etc/postfixadmin/config.local.php.j2
-    dest: /usr/local/share/{{ postfixadminversion }}/config.local.php
+    dest: /etc/postfixadmin/config.local.php
     owner: root
     group: www-data
     mode: 0640
   tags:
-    - postfixadmin
     - postfixadminconf
+
+- name: add symlink to config.local.php
+  file:
+    path: /usr/share/postfixadmin/config.local.php
+    src: /etc/postfixadmin/config.local.php
+    state: link
+
+- name: create templates_c and make writeble by web server
+  file:
+    path: /usr/share/postfixadmin/templates_c
+    state: directory
+    owner: root
+    group: www-data
+    mode: 0770
 
 - name: create database for mail server
   mysql_db:
@@ -112,4 +77,6 @@
     mode: 0640
   with_items:
     - mail.conf
+  notify:
+    - reload apache2
   when: postfix_admin_db_passwd != ""

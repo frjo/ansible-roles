@@ -25,12 +25,8 @@
     chdir: "{{ acme_challenge_dir }}"
   when: port80.stdout == "0"
 
-- name: open up port 80 ipv4
-  command: iptables -A INPUT -i {{ ansible_default_ipv4.interface }} -p tcp --dport 80 -m conntrack --ctstate NEW -j ACCEPT
-  when: port80.stdout == "0"
-
-- name: open up port 80 ipv6
-  command: ip6tables -A INPUT -i {{ ansible_default_ipv6.interface }} -p tcp --dport 80 -m conntrack --ctstate NEW -j ACCEPT
+- name: open up port 80
+  command: nft add rule inet firewall incoming tcp dport 80 ct state new accept
   when: port80.stdout == "0"
 
 - name: get a signed certificate
@@ -41,12 +37,10 @@
     creates: "{{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt"
   ignore_errors: yes
 
-- name: close port 80 ipv4
-  command: iptables -D INPUT -i {{ ansible_default_ipv4.interface }} -p tcp --dport 80 -m conntrack --ctstate NEW -j ACCEPT
-  when: port80.stdout == "0"
-
-- name: close port 80 ipv6
-  command: ip6tables -D INPUT -i {{ ansible_default_ipv6.interface }} -p tcp --dport 80 -m conntrack --ctstate NEW -j ACCEPT
+- name: close port 80 by restarting nftables
+  service:
+    name: nftables
+    state: restarted
   when: port80.stdout == "0"
 
 - name: stop the simple web server if needed

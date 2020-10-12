@@ -142,8 +142,8 @@ policyd-spf_time_limit = 3600
 # RBL response templates
 rbl_reply_maps = hash:/etc/postfix/rbl_reply_maps
 
+smtp_discard_ehlo_keyword_address_maps = cidr:/etc/postfix/discard_ehlo_map.cidr
 smtpd_discard_ehlo_keyword_address_maps = cidr:/etc/postfix/discard_ehlo_map.cidr
-
 proxy_read_maps = $local_recipient_maps $mydestination $virtual_alias_maps $virtual_alias_domains $virtual_mailbox_maps $virtual_mailbox_domains $relay_recipient_maps $relay_domains $canonical_maps $sender_canonical_maps $recipient_canonical_maps $relocated_maps $transport_maps $mynetworks
 virtual_minimum_uid = 5000
 virtual_gid_maps = static:5000

@@ -61,6 +61,15 @@
   notify:
     - restart mysql
 
+- name: add a debian.cnf file with root password
+  template:
+    src: etc/mysql/debian.cnf.j2
+    dest: /etc/mysql/debian.cnf
+    owner: root
+    group: root
+    mode: 0600
+  when: db_root_passwd != ""
+
 - name: add a root .my.cnf file
   template:
     src: root/my.cnf.j2
