@@ -1,21 +1,24 @@
 ---
-- name: add unstable packages for debian
+- name: add backports packages for debian
   copy:
-    src: etc/apt/sources.list.d/unstable.list
-    dest: /etc/apt/sources.list.d/unstable.list
+    src: etc/apt/sources.list.d/backports.list
+    dest: /etc/apt/sources.list.d/backports.list
     owner: root
     group: root
     mode: 0644
 
-- name: give unstable packages for debian a low priority
-  copy:
-    src: etc/apt/preferences.d/limit-unstable
-    dest: /etc/apt/preferences.d/limit-unstable
-    owner: root
-    group: root
-    mode: 0644
+- name: ensure wireguard packages are installed (only in backports)
+  apt:
+    pkg: "{{ packages }}"
+    state: latest
+    default_release: buster-backports
+    update_cache: yes
+    cache_valid_time: 600
+  vars:
+    packages:
+      - wireguard
 
-- name: ensure wireguard packages are installed
+- name: ensure qrencode packages are installed
   apt:
     pkg: "{{ packages }}"
     state: latest
@@ -23,5 +26,4 @@
     cache_valid_time: 600
   vars:
     packages:
-      - wireguard
       - qrencode
