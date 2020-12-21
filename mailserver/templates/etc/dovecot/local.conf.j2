@@ -14,8 +14,6 @@ default_process_limit = 150
 
 ssl = required
 
-ssl_protocols = !SSLv3
-
 {% if acme_certs_dir_check.stat.isdir is defined %}
 ssl_cert = <{{ acme_certs_dir }}/{{ acme_domains[0] }}/signed.crt
 ssl_key = <{{ acme_certs_dir }}/domain.key
@@ -91,4 +89,17 @@ service auth {
 
 service auth-worker {
   user = $default_internal_user
+}
+
+service stats {
+  unix_listener stats-reader {
+    group = vmail
+    user = vmail
+    mode = 0660
+  }
+  unix_listener stats-writer {
+    group = vmail
+    user = vmail
+    mode = 0660
+  }
 }

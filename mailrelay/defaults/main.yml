@@ -2,6 +2,7 @@
 acme_certs_dir: /etc/ssl/letsencrypt
 acme_domains:
   - "{{ ansible_fqdn }}"
+mail_inet_protocols: "all"
 openports_list:
   - 22
   - 25
