@@ -15,4 +15,6 @@
     - dns
 - include: ntp.yml
 - include: tools.yml
+  tags:
+    - tools
 - include: misc.yml

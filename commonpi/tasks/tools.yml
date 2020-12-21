@@ -17,3 +17,4 @@
       - sudo
       - tmux
       - vim-nox
+      - zsh

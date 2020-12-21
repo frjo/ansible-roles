@@ -1,5 +1,7 @@
 #!/usr/sbin/nft -f
 
+# Hook order is: ingress -> prerouting -> input/output/forward -> postrouting
+
 flush ruleset
 
 define wan = {{ network_interface | default(ansible_default_ipv4.interface) }}
@@ -11,21 +13,21 @@ table inet firewall {
       {{ openports_list|join(',') }}
     }
   }
+
   set udp_accepted {
     type inet_service; flags interval;
     elements = {
       {{ openports_udp_list|join(',') }}
     }
   }
-  set blocklist_v4 {
-    type ipv4_addr; flags interval;
-    elements = {
-      {{ blocklist_ip_list|join(',') }}
-    }
-  }
 
   chain incoming {
     type filter hook input priority 0; policy drop;
+
+    ct state invalid drop
+
+    # Drop none SYN packets.
+    tcp flags & (fin|syn|rst|ack) != syn ct state new counter drop
 
     # Limit ping requests.
     ip protocol icmp icmp type echo-request limit rate over 1/second burst 5 packets drop
@@ -33,29 +35,13 @@ table inet firewall {
 
     # Rules with "limit" need to be put before rules accepting "established" connections.
     ct state established,related accept
-    ct state invalid drop
 
     # Allow loopback.
     iif lo accept
 
-    # Block bad addresses.
-    ip saddr @blocklist_v4 counter drop
-
-    # Drop all fragments.
-    ip frag-off & 0x1fff != 0 counter drop
-
-    # Force SYN checks.
-    tcp flags & (fin|syn|rst|ack) != syn ct state new counter drop
-
-    # Drop XMAS packets.
-    tcp flags & (fin|syn|rst|psh|ack|urg) == fin|syn|rst|psh|ack|urg counter drop
-
-    # Drop NULL packets.
-    tcp flags & (fin|syn|rst|psh|ack|urg) == 0x0 counter drop
-
     # Allow certain inbound ICMP types (ping, traceroute).
     ip protocol icmp icmp type { destination-unreachable, echo-reply, echo-request, time-exceeded } accept
-    ip6 nexthdr icmpv6 icmpv6 type { destination-unreachable, echo-reply, echo-request, nd-neighbor-solicit,  nd-router-advert, nd-neighbor-advert, packet-too-big, parameter-problem, time-exceeded } accept
+    ip6 nexthdr icmpv6 icmpv6 type { destination-unreachable, echo-reply, echo-request, nd-neighbor-advert, nd-neighbor-solicit, nd-router-advert, packet-too-big, parameter-problem, time-exceeded } accept
 
     # Allow needed ports.
     iifname $wan tcp dport @tcp_accepted ct state new accept
@@ -71,8 +57,8 @@ table inet firewall {
   chain forwarding {
     type filter hook forward priority 0; policy drop;
 
-    ct state established,related accept
     ct state invalid drop
+    ct state established,related accept
 
 {% if vpn_interface is defined %}
     iifname {{ vpn_interface }} oifname $wan ct state new accept
@@ -82,20 +68,52 @@ table inet firewall {
   chain outgoing {
     type filter hook output priority 0; policy drop;
 
-    ct state new,established,related accept
     ct state invalid drop
+
+    # For some reason ipv6 ICMP needs to be explicitly allowed here.
+    ip6 nexthdr ipv6-icmp accept
+    ct state new,established,related accept
   }
 }
 
-{% if vpn_interface is defined and vpn_network is defined %}
+{% if vpn_network is defined %}
 table ip router {
-    chain prerouting {
-        type nat hook prerouting priority 0;
-    }
-    chain postrouting {
-        type nat hook postrouting priority 100;
+  chain prerouting {
+    type nat hook prerouting priority -100;
+  }
 
-        oifname $wan ip saddr {{ vpn_network }}.0/24 masquerade
-    }
+  chain postrouting {
+    type nat hook postrouting priority 100;
+
+    oifname $wan ip saddr {{ vpn_network }}.0/24 masquerade
+  }
 }
 {% endif %}
+
+table netdev filter {
+  set blocklist_v4 {
+    type ipv4_addr; flags interval;
+    elements = {
+      {{ blocklist_ip_list|join(',') }}
+    }
+  }
+
+  chain ingress {
+    type filter hook ingress device {{ network_interface | default(ansible_default_ipv4.interface) }} priority -500;
+
+    # Drop all fragments.
+    ip frag-off & 0x1fff != 0 counter drop
+
+    # Drop bad addresses.
+    ip saddr @blocklist_v4 counter drop
+
+    # Drop XMAS packets.
+    tcp flags & (fin|syn|rst|psh|ack|urg) == fin|syn|rst|psh|ack|urg counter drop
+
+    # Drop NULL packets.
+    tcp flags & (fin|syn|rst|psh|ack|urg) == 0x0 counter drop
+
+    # Drop uncommon MSS values.
+    tcp flags syn tcp option maxseg size 1-535 counter drop
+  }
+}
