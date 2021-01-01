@@ -4,6 +4,7 @@ acme_csr_rebuild: false
 acme_logcheck: false
 acme_certs_dir: /etc/ssl/letsencrypt
 acme_challenge_dir: /var/www/challenges
+acme_intermediate_cert: https://letsencrypt.org/certs/lets-encrypt-r3.pem
 acme_country: ""
 acme_organization: ""
 acme_domains:

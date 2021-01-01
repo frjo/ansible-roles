@@ -19,7 +19,7 @@ while true; do
        > {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt \
        2>> /var/log/acme_tiny.log
   then
-    wget -O - https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem > {{ acme_certs_dir }}/chain_new.pem
+    wget -O - {{ acme_intermediate_cert }} > {{ acme_certs_dir }}/chain_new.pem
     # Check that the cert is valid.
     if openssl verify -CAfile {{ acme_certs_dir }}/chain_new.pem \
         {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt
