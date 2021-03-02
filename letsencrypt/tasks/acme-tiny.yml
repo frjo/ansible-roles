@@ -30,7 +30,7 @@
   when: port80.stdout == "0"
 
 - name: get a signed certificate
-  shell: /usr/bin/python /usr/local/bin/acme_tiny.py --disable-check --account-key {{ acme_certs_dir }}/account.key --csr {{ acme_certs_dir }}/{{ acme_domains[0] }}/domain.csr --acme-dir {{ acme_challenge_dir }} > {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt
+  shell: /usr/bin/python3 /usr/local/bin/acme_tiny.py --disable-check --account-key {{ acme_certs_dir }}/account.key --csr {{ acme_certs_dir }}/{{ acme_domains[0] }}/domain.csr --acme-dir {{ acme_challenge_dir }} > {{ acme_certs_dir }}/{{ acme_domains[0] }}/signed_new.crt
   become: true
   become_user: acme
   args:

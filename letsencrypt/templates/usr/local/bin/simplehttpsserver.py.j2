@@ -1,9 +1,8 @@
-#!/usr/bin/env python
-"""A simple https server in python."""
-import SimpleHTTPServer
-import SocketServer
+#!/usr/bin/env python3
+"""A simple https server in python3."""
 import ssl
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
-httpd = SocketServer.TCPServer(('', 443), SimpleHTTPServer.SimpleHTTPRequestHandler)
+httpd = HTTPServer(('localhost', 443), BaseHTTPRequestHandler)
 httpd.socket = ssl.wrap_socket(httpd.socket, certfile='{{ acme_certs_dir }}/{{ acme_domains[0] }}/signed.crt', keyfile='{{ acme_certs_dir }}/domain.key', server_side=True)
 httpd.serve_forever()
