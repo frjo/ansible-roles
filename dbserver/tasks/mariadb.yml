@@ -8,7 +8,7 @@
   vars:
     packages:
       - mariadb-server
-      - python-mysqldb
+      - python3-mysqldb
 
 - name: update mariadb root passwd
   mysql_user:
