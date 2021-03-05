@@ -6,5 +6,5 @@ PrivateKey = {{ private_key_files.results[item|int].stdout }}
 [Peer]
 PublicKey = {{ public_key_files.results[0].stdout }}
 AllowedIPs = 0.0.0.0/0
-Endpoint = {{ ansible_default_ipv4.address }}:{{ vpn_port }}
+Endpoint = {{ ansible_fqdn }}:{{ vpn_port }}
 PersistentKeepalive = {{ vpn_persistent_keepalive }}
